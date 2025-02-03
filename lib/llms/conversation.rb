@@ -11,6 +11,10 @@ module LLMs
       @available_tools = nil
     end
 
+    def pending?
+      @messages.last&.user?
+    end
+
     def set_system_message(content)
       raise "content is not a String" unless content.is_a?(String)
       @system_message = content
@@ -25,7 +29,7 @@ module LLMs
         unless tool_results.nil?
           raise "tool_results argument not allowed when adding a ConversationMessage"
         end
-        unless content.role == "user"
+        unless content.user?
           raise "message role must be 'user' when calling add_user_message with a ConversationMessage"
         end
         add_conversation_message(content)
@@ -42,8 +46,7 @@ module LLMs
         unless tool_calls.nil?
           raise "tool_calls argument not allowed when adding a ConversationMessage"
         end
-        unless content.role == "assistant"
-          pp content.role, content.text[0..100]
+        unless content.assistant?
           raise "message role must be 'assistant' when calling add_assistant_message with a ConversationMessage"
         end
         add_conversation_message(content)
@@ -86,5 +89,15 @@ module LLMs
     def last_message
       @messages.last&.dup
     end
+
+    def find_tool_call(tool_call_id)
+      @messages.each do |message|
+        message.tool_calls&.each do |tool_call|
+          return tool_call if tool_call.tool_call_id == tool_call_id
+        end
+      end
+      nil
+    end
+
   end
 end
