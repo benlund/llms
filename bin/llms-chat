@@ -41,6 +41,7 @@ executor = LLMs::Executors.instance(
 )
 
 def run_chat(executor, options)
+  puts executor.model_name
   conversation = LLMs::Conversation.new
   conversation.set_system_message(options[:system_prompt])
 
@@ -74,6 +75,7 @@ def run_chat(executor, options)
 end
 
 def run_prompt(executor, prompt, options)
+  puts executor.model_name
   if options[:stream]
     #executor.execute_prompt(prompt.strip, system_prompt: options[:system_prompt]) { |chunk| print chunk }
     executor.execute_prompt(prompt.strip) { |chunk| print chunk }
