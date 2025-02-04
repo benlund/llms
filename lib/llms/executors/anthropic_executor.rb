@@ -142,13 +142,11 @@ module LLMs
         return unless api_response['usage']
         input_tokens = api_response['usage']['input_tokens']
         output_tokens = api_response['usage']['output_tokens']
-
-        total_cost = calculate_cost(input_tokens, output_tokens)
         {
           input_tokens: input_tokens,
           output_tokens: output_tokens,
-          execution_time: execution_time.round(3),
-          total_cost: total_cost
+          execution_time: execution_time,
+          estimated_cost: calculate_cost(input_tokens, output_tokens)
         }
       end
     end

@@ -169,14 +169,11 @@ module LLMs
 
         input_tokens = response['usage']['prompt_tokens']
         output_tokens = response['usage']['completion_tokens']
-
-        total_cost = calculate_cost(input_tokens, output_tokens)
-
         {
           input_tokens: input_tokens,
           output_tokens: output_tokens,
-          execution_time: execution_time.round(3),
-          total_cost: total_cost
+          execution_time: execution_time,
+          estimated_cost: calculate_cost(input_tokens, output_tokens)
         }
       end
 
