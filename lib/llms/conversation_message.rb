@@ -7,7 +7,7 @@ module LLMs
     attr_reader :role, :text, :tool_calls, :tool_results
 
     def initialize(role, text, tool_calls = nil, tool_results = nil)
-      raise "role is not one of the allowed values" unless role == USER_ROLE || role == ASSISTANT_ROLE || role == SYSTEM_ROLE
+      raise "role (#{role}) is not one of the allowed values" unless role == USER_ROLE || role == ASSISTANT_ROLE || role == SYSTEM_ROLE
       @role = role
       @text = text
       @tool_calls = tool_calls

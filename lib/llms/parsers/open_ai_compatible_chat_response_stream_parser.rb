@@ -18,7 +18,7 @@ module LLMs
         {
           'id' => @id,
           'model' => @model,
-          'choices' => @choices, #converted_choices,
+          'choices' => @choices, #converted_choices, @@ TODO
           'usage' => @usage,
           'created' => @created
         }
