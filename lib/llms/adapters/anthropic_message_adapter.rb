@@ -17,8 +17,20 @@ module LLMs
           content << tr
         end
 
-        if message.text
-          content << {type: 'text', text: message.text}
+        message.parts&.each do |part|
+          if part[:text]
+            content << {type: 'text', text: part[:text]}
+          end
+          if part[:image]
+            content << {
+              type: 'image',
+              source: {
+                type: 'base64',
+                media_type: part[:media_type] || 'image/png', ##@@ TODO remove this
+                data: part[:image]
+              }
+            }
+          end
         end
 
         message.tool_calls&.each do |tool_call|

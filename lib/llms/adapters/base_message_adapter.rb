@@ -11,7 +11,7 @@ module LLMs
         role = transform_role(find_role(api_format))
         text = transform_text(find_text(api_format))
         tool_calls = transform_tool_calls(find_tool_calls(api_format))
-        LLMs::ConversationMessage.new(role, text, tool_calls, nil)
+        LLMs::ConversationMessage.new(role, [{text: text}], tool_calls, nil) ##@@ TODO better
       end
 
       def self.transform_role(role)
