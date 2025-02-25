@@ -100,6 +100,12 @@ module LLMs
           if @available_tools && @available_tools.any?
             params[:tools] = tool_schemas
           end
+          if @thinking_mode
+            params[:thinking] = {
+              type: 'enabled',
+              budget_tokens: @thinking_max_tokens
+            }          
+          end
         end
       end        
 

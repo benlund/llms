@@ -11,7 +11,9 @@ options = {
   stream: true,
   system_prompt: "You are a helpful assistant",
   model: "claude-3-5-sonnet-latest",
-  max_tokens: 1000
+  max_tokens: 2048,
+  thinking: false,
+  thinking_max_tokens: 1024
 }
 
 OptionParser.new do |opts|
@@ -29,15 +31,25 @@ OptionParser.new do |opts|
     options[:model] = model
   end
 
-  opts.on("--max-tokens N", Integer, "Set max tokens (default: 1000)") do |n|
+  opts.on("--max-tokens N", Integer, "Set max tokens (default: #{options[:max_tokens]})") do |n|
     options[:max_tokens] = n
+  end
+
+  opts.on("-t", "--thinking", "Enable thinking mode") do
+    options[:thinking] = true
+  end
+
+  opts.on("--thinking-max-tokens N", Integer, "Set max tokens for thinking mode (default: #{options[:thinking_max_tokens]})") do |n|
+    options[:thinking_max_tokens] = n
   end
 end.parse!
 
 executor = LLMs::Executors.instance(
   model_name: options[:model],
   temperature: TEMPERATURE,
-  max_tokens: options[:max_tokens]
+  max_tokens: options[:max_tokens],
+  thinking: options[:thinking],
+  thinking_max_tokens: options[:thinking_max_tokens]
 )
 
 def run_chat(executor, options)
