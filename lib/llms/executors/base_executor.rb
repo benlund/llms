@@ -6,19 +6,28 @@ module LLMs
     class BaseExecutor
 
       DEFAULT_MAX_TOKENS = 4000 ## TODO!
+      DEFAULT_MAX_THINKING_TOKENS = DEFAULT_MAX_TOKENS / 2 ## TODO!!
       DEFAULT_TEMPERATURE = 0.0
+      DEFAULT_THINKING_LEVEL = 'low' ## TODO!!!
 
       attr_reader :client, :model_name, :model_info, :system_prompt, :temperature, :max_tokens, :available_tools,
+                  :thinking_mode, :thinking_max_tokens, :thinking_level,
                   :last_sent_message, :last_received_message_id, :last_received_message, :last_usage_data, :last_error
 
-      def initialize(model_name:, model_info: nil, system_prompt: nil, tools: nil,
-                     temperature: DEFAULT_TEMPERATURE, max_tokens: DEFAULT_MAX_TOKENS)
-        @model_name = validate_model_name(model_name)
-        @model_info = model_info # Should include :pricing and :connection info
-        @system_prompt = system_prompt
-        @temperature = temperature
-        @max_tokens = max_tokens
-        @available_tools = tools
+      def initialize(**params)
+        raise "model_name: is required" if params[:model_name].nil?
+        
+        @model_name = validate_model_name(params[:model_name])
+        @model_info = params[:model_info] # Should include :pricing and :connection info
+        @system_prompt = params[:system_prompt]
+        @temperature = params[:temperature] || DEFAULT_TEMPERATURE
+        @max_tokens = params[:max_tokens] || DEFAULT_MAX_TOKENS
+        @available_tools = params[:tools]
+
+        ##@@ TODO check model suports these params
+        @thinking_mode = params.key?(:thinking) ? params[:thinking] : false
+        @thinking_max_tokens = params.key?(:thinking_max_tokens) ? params[:thinking_max_tokens] : DEFAULT_MAX_THINKING_TOKENS
+        @thinking_level = params.key?(:thinking_level) ? params[:thinking_level] : DEFAULT_THINKING_LEVEL
 
         @last_sent_message = nil
         @last_received_message = nil
@@ -49,6 +58,7 @@ module LLMs
       end
 
       ## override to restrict models to a specific set
+      ##@@ TODO check it is a known model
       def validate_model_name(model_name)
         model_name 
       end
