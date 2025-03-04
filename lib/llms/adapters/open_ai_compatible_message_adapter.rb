@@ -19,13 +19,24 @@ module LLMs
         end
 
         m = {
-          role: message.role
+          role: message.role,
+          content: []
         }
 
-        if message.text
+        if message.system? && message.text
           m[:content] = message.text
+        else
+          message.parts&.each do |part|
+            if part[:text]
+              m[:content] << {type: 'text', text: part[:text]}
+            end
+
+            if part[:image]
+              m[:content] << {type: 'image_url', image_url: {url: "data:#{part[:media_type] || 'image/png'};base64,#{part[:image]}"}}
+            end
+          end
         end
-          
+
         message.tool_calls&.each do |tool_call|
           m[:tool_calls] ||= []
           m[:tool_calls] << {

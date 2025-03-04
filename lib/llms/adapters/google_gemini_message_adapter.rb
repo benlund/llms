@@ -12,9 +12,22 @@ module LLMs
         message.tool_results&.each do |tool_result|
           parts << {functionResponse: { name: tool_result.name, response: { name: tool_result.name, content: tool_result.results}}}
         end
-        if message.text
-          parts << {text: message.text}
+
+        message.parts&.each do |part|
+          if part[:text]
+            parts << {text: part[:text]}
+          end
+          if part[:image]
+            parts << {
+              inline_data: {
+                mime_type: part[:media_type] || 'image/png',
+                data: part[:image]
+              }
+            }
+          end
         end
+
+
         message.tool_calls&.each do |tool_call|
           parts << {functionCall: {name: tool_call.name, args: tool_call.arguments}}
         end
