@@ -41,7 +41,11 @@ module LLMs
           end
         else
           response = http.request(request)
-          JSON.parse(response.body)
+          if response.code.to_s == '200'
+            JSON.parse(response.body)
+          else
+            {'error' => JSON.parse(response.body)} ##@@ TODO better detail here
+          end
         end
       end
 
