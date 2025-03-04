@@ -8,10 +8,19 @@ module LLMs
       end
 
       def self.message_from_api_format(api_format)
-        role = transform_role(find_role(api_format))
-        text = transform_text(find_text(api_format))
-        tool_calls = transform_tool_calls(find_tool_calls(api_format))
-        LLMs::ConversationMessage.new(role, [{text: text}], tool_calls, nil) ##@@ TODO better
+        if self.has_message?(api_format)
+          role = transform_role(find_role(api_format))
+          text = transform_text(find_text(api_format))
+          tool_calls = transform_tool_calls(find_tool_calls(api_format))
+          LLMs::ConversationMessage.new(role, [{text: text}], tool_calls, nil) ##@@ TODO better way to handle text
+        else
+          nil
+        end
+      end
+
+      def self.has_message?(api_format)
+        ## TODO override me as needed in subclasses
+        !find_role(api_format).nil?
       end
 
       def self.transform_role(role)

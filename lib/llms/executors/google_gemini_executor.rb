@@ -64,9 +64,17 @@ module LLMs
           return nil
         end
 
-        @last_received_message_id = "gemini-#{Time.now.to_i}" ## no message id in the response
         @last_received_message = LLMs::Adapters::GoogleGeminiMessageAdapter.message_from_api_format(http_response)
+        if @last_received_message.nil?
+          @last_error = {'error' => 'No message found in the response. Can happen with thinking models if max_tokens is too low.'}
+          return nil
+        end
+
+        ## TODO do this for other adapters too???
+
+        @last_received_message_id = "gemini-#{Time.now.to_i}" ## no message id in the response
         @last_usage_data = calculate_usage(http_response, execution_time)
+
 
         @last_received_message
       end
@@ -94,7 +102,7 @@ module LLMs
         parser = Parsers::GoogleGeminiChatResponseStreamParser.new(emitter)
 
         params = request_params.merge(stream: Proc.new { |chunk| parser.add_data(chunk) })
-        http_response = @client.generate_content(@model_name, @formatted_messages, params)
+        http_response = @client.generate_content(@model_name, @formatted_messages, params)        
 
         @last_received_message_id = parser.current_message_id ##no message id in the response
 
