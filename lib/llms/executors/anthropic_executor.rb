@@ -159,7 +159,6 @@ module LLMs
 
       def calculate_usage(api_response, execution_time)
         return unless api_response['usage']
-        pp api_response['usage']
         input_tokens = api_response['usage']['input_tokens']
         output_tokens = api_response['usage']['output_tokens']
         cache_write_tokens = api_response['usage']['cache_creation_input_tokens']
