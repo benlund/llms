@@ -22,8 +22,10 @@ def test_model_caching(model_name)
     usage = executor.last_usage_data
     puts "Usage: #{usage.inspect}"
 
-    if usage[:input_prompt_cache_tokens]
+    if usage.fetch(:cache_read_tokens, 0) > 0
       puts "\e[32mSUCCESS: Prompt caching detected!\e[0m"
+    else
+      puts "\e[31mFAILURE: Prompt caching not detected!\e[0m"
     end
 
   rescue => e
