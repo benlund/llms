@@ -23,6 +23,7 @@ module LLMs
         @temperature = params[:temperature] || DEFAULT_TEMPERATURE
         @max_tokens = params[:max_tokens] || DEFAULT_MAX_TOKENS
         @available_tools = params[:tools]
+        @cache_prompt = params[:cache_prompt]
 
         ##@@ TODO check model suports these params
         @thinking_mode = params.key?(:thinking) ? params[:thinking] : false
@@ -67,15 +68,29 @@ module LLMs
         raise NotImplementedError, "Subclasses must implement tool_schemas"
       end
 
+      def caching_enabled?
+        @cache_prompt == true
+      end
+
       def calculate_usage(response)
         raise NotImplementedError, "Subclasses must implement calculate_usage"
       end
 
-      def calculate_cost(input_tokens, output_tokens)
+      def calculate_cost(input_tokens, output_tokens, cache_write_tokens = 0, cache_read_tokens = 0)
         if @model_info && @model_info[:pricing]
-          input_cost = (input_tokens.to_f / 1_000_000.0) * @model_info[:pricing][:input]
-          output_cost = (output_tokens.to_f / 1_000_000.0) * @model_info[:pricing][:output]
-          input_cost + output_cost
+          cost_components = []
+          cost_components << {name: "input", cost: (input_tokens.to_f / 1_000_000.0) * @model_info[:pricing][:input]}
+          cost_components << {name: "output", cost: (output_tokens.to_f / 1_000_000.0) * @model_info[:pricing][:output]}
+          if cache_write_tokens > 0
+            raise "Cache write pricing not set" unless @model_info[:pricing][:cache_write]
+            cost_components << {name: "cache_write", cost: (cache_write_tokens.to_f / 1_000_000.0) * @model_info[:pricing][:cache_write]}
+          end
+          if cache_read_tokens > 0
+            raise "Cache read pricing not set" unless @model_info[:pricing][:cache_read]
+            cost_components << {name: "cache_read", cost: (cache_read_tokens.to_f / 1_000_000.0) * @model_info[:pricing][:cache_read]}
+          end
+          ## TODO return detailed cost components
+          cost_components.sum { |c| c[:cost] }
         end
       end
 

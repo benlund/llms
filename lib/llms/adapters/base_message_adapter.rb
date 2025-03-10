@@ -3,7 +3,14 @@ require_relative '../conversation_message'
 module LLMs
   module Adapters
     class BaseMessageAdapter
-      def to_api_format(message)
+
+      def self.messages_to_api_format(messages, caching_enabled = false)
+        messages.map do |message|
+          to_api_format(message, caching_enabled)
+        end
+      end
+
+      def self.to_api_format(message, caching_enabled = false)
         raise "Not implemented"
       end
 

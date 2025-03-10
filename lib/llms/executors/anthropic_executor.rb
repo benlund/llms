@@ -84,7 +84,8 @@ module LLMs
 
         @system_prompt = conversation.system_message
         @available_tools = conversation.available_tools ##@@ TODO map through an adapter here
-        @formatted_messages = conversation.formatted_messages(LLMs::Adapters::AnthropicMessageAdapter)
+        ## TODO add acache control to last tool definition
+        @formatted_messages = conversation.formatted_messages(LLMs::Adapters::AnthropicMessageAdapter, caching_enabled?)
       end
 
       def request_params
@@ -95,7 +96,7 @@ module LLMs
           max_tokens: @max_tokens
         }.tap do |params|
           if @system_prompt
-            params[:system] = @system_prompt
+            params[:system] = system_param
           end
           if @available_tools && @available_tools.any?
             params[:tools] = tool_schemas
@@ -131,7 +132,7 @@ module LLMs
       end
 
       def tool_schemas
-        @available_tools.map do |tool|
+        ts = @available_tools.map do |tool|
           {
             name: tool.tool_schema[:name],
             description: tool.tool_schema[:description],
@@ -142,17 +143,34 @@ module LLMs
             }
           }
         end
+        if caching_enabled?
+          ts.last[:cache_control] = {type: "ephemeral"}
+        end
+        ts
+      end
+
+      def system_param
+        if caching_enabled?
+          [{type: "text", text: @system_prompt, cache_control: {type: "ephemeral"}}]
+        else
+          @system_prompt
+        end
       end
 
       def calculate_usage(api_response, execution_time)
         return unless api_response['usage']
+        pp api_response['usage']
         input_tokens = api_response['usage']['input_tokens']
         output_tokens = api_response['usage']['output_tokens']
+        cache_write_tokens = api_response['usage']['cache_creation_input_tokens']
+        cache_read_tokens = api_response['usage']['cache_read_input_tokens']
         {
           input_tokens: input_tokens,
           output_tokens: output_tokens,
+          cache_write_tokens: cache_write_tokens,
+          cache_read_tokens: cache_read_tokens,
           execution_time: execution_time,
-          estimated_cost: calculate_cost(input_tokens, output_tokens)
+          estimated_cost: calculate_cost(input_tokens, output_tokens, cache_write_tokens, cache_read_tokens)
         }
       end
     end

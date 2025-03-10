@@ -8,6 +8,8 @@
             "claude-3-haiku-20240307": {
                 "input": 0.25,
                 "output": 1.25,
+                "cache_write": 0.30,
+                "cache_read": 0.03,
                 "context_window": 200000,
                 "max_output": 4096,
                 "_checked": true
@@ -15,6 +17,8 @@
             "claude-3-5-haiku-20241022": {
                 "input": 0.8,
                 "output": 4.00,
+                "cache_write": 1.00,
+                "cache_read": 0.08,
                 "context_window": 200000,
                 "max_output": 8192,
                 "_checked": true
@@ -22,6 +26,8 @@
             "claude-3-5-sonnet-20240620": {
                 "input": 3.00,
                 "output": 15.00,
+                "cache_write": 3.75,
+                "cache_read": 0.30,
                 "context_window": 200000,
                 "max_output": 8192,
                 "_checked": true
@@ -29,6 +35,8 @@
             "claude-3-5-sonnet-latest": {
                 "input": 3.00,
                 "output": 15.00,
+                "cache_write": 3.75,
+                "cache_read": 0.30,
                 "context_window": 200000,
                 "max_output": 8192,
                 "_checked": true,
@@ -37,6 +45,8 @@
             "claude-3-7-sonnet-20250219": {
                 "input": 3.00,
                 "output": 15.00,
+                "cache_write": 3.75,
+                "cache_read": 0.30,
                 "context_window": 200000,
                 "max_output": 8192,
                 "max_output_thinking": 64000,
@@ -47,6 +57,8 @@
             "claude-3-7-sonnet-latest": {
                 "input": 3.00,
                 "output": 15.00,
+                "cache_write": 3.75,
+                "cache_read": 0.30,
                 "context_window": 200000,
                 "max_output": 8192,
                 "max_output_thinking": 64000,
@@ -57,6 +69,8 @@
             "claude-3-opus-20240229": {
                 "input": 15.00,
                 "output": 75.00,
+                "cache_write": 18.75,
+                "cache_read": 1.50,
                 "context_window": 200000,
                 "max_output": 4096,
                 "_checked": true

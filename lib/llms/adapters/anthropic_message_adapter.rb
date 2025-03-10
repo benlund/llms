@@ -6,7 +6,14 @@ module LLMs
   module Adapters
     class AnthropicMessageAdapter < BaseMessageAdapter
 
-      def self.to_api_format(message)
+      def self.messages_to_api_format(messages, caching_enabled = false)
+        messages_count = messages.size
+        messages.map.with_index do |message, index|
+          to_api_format(message, caching_enabled && index == messages_count - 1)
+        end
+      end
+
+      def self.to_api_format(message, caching_enabled = false)
         content = []
 
         message.tool_results&.each do |tool_result|
@@ -35,6 +42,10 @@ module LLMs
 
         message.tool_calls&.each do |tool_call|
           content << {type: 'tool_use', id: tool_call.tool_call_id, name: tool_call.name, input: tool_call.arguments}
+        end
+
+        if caching_enabled
+          content.last[:cache_control] = {type: 'ephemeral'}
         end
 
         {
