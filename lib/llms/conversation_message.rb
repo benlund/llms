@@ -36,7 +36,7 @@ module LLMs
     end
 
     def empty?
-      (@parts.nil? || @parts.empty? || self.text.empty?) &&
+      (@parts.nil? || @parts.empty? || self.text.nil? || self.text.empty?) &&
         (@tool_calls.nil? || @tool_calls.empty?) &&
         (@tool_results.nil? || @tool_results.empty?)
     end
