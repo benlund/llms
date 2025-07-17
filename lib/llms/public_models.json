@@ -66,7 +66,7 @@
                 "input": 0.8,
                 "output": 4.00,
                 "cache_write_5min": 1.00,
-                "cache_write_5min": 1.60,
+                "cache_write_1hr": 1.60,
                 "cache_read": 0.08,
                 "context_window": 200000,
                 "max_output": 8192
@@ -90,6 +90,7 @@
                 "max_output": 4096
             }
         },
+        "tools": true,
         "enabled": true
     },
 
@@ -166,6 +167,7 @@
                 "max_output": 8192
             }
         },
+        "tools": true,
         "enabled": true
     },
 
@@ -215,6 +217,7 @@
                 "context_window": 32768
             }
         },
+        "tools": true,
         "enabled": true
     },
 
@@ -226,21 +229,40 @@
             "exclude_params": ["max_tokens"]
         },
         "models": {
+            "llama-4-scout-17b-16e-instruct": {
+                "input": 0.65,
+                "output": 0.85,
+                "context_window": 8192,
+                "tools": true
+            },
             "llama3.1-8b": {
-                "input": 0.00,
-                "output": 0.00,
+                "input": 0.10,
+                "output": 0.10,
                 "context_window": 8192,
                 "tools": true
             },
             "llama3.3-70b": {
-                "input": 0.00,
-                "output": 0.00,
+                "input": 0.85,
+                "output": 1.20,
                 "context_window": 8192,
                 "tools": true
+            },
+            "qwen-3-32b": {
+                "input": 0.40,
+                "output": 0.80,
+                "context_window": 64000,
+                "tools": true,
+                "enabled": false
+            },
+            "qwen-3-235b-a22b": {
+                "input": 0.60,
+                "output": 1.20,
+                "context_window": 41000,
+                "tools": true,
+                "enabled": false
             }
         },
-        "enabled": true,
-        "_todo": "check pricing, check max output, check availailability of usage data"
+        "enabled": true
     },
 
     "hyperbolic": {
@@ -250,36 +272,44 @@
             "base_url": "https://api.hyperbolic.xyz/v1"
         },
         "models": {
+            "moonshotai/Kimi-K2-Instruct": {
+                "input": 2.00,
+                "output": 2.00,
+                "context_window": 131069
+            },
+            "deepseek-ai/DeepSeek-R1-0528": {
+                "input": 3.00,
+                "output": 3.00,
+                "context_window": 163840
+            },
+            "Qwen/Qwen3-235B-A22B": {
+                "input": 0.40,
+                "output": 0.40,
+                "context_window": 40960
+            },
+            "deepseek-ai/DeepSeek-V3-0324": {
+                "input": 1.25,
+                "output": 1.25,
+                "context_window": 131069
+            },
+            "Qwen/QwQ-32B": {
+                "input": 0.40,
+                "output": 0.40,
+                "context_window": 131069
+            },
+            "meta-llama/Llama-3.3-70B-Instruct": {
+                "input": 0.40,
+                "output": 0.40,
+                "context_window": 131069
+            },
             "Qwen/Qwen2.5-Coder-32B-Instruct": {
                 "input": 0.2,
                 "output": 0.2,
-                "_checked": true
-            },
-            "deepseek-ai/DeepSeek-V3": {
-                "input": 0.25,
-                "output": 0.25,
-                "context_window": 131000,
-                "_checked": true,
-                "quantization": "fp8"
-            },
-            "Qwen/Qwen2-VL-7B-Instruct": {
-                "quantization": "bf16",
-                "input": 0.1,
-                "output": 0.1,
-                "_images": true,
-                "_checked": true
-            },
-            "Qwen/Qwen2-VL-72B-Instruct": {
-                "quantization": "bf16",
-                "input": 0.4,
-                "output": 0.4,
-                "_images": true,
-                "_checked": true
+                "context_window": 131072
             }
         },
         "enabled": true,
-        "tools": false,
-        "_todo": "check pricing; double check no tool support"
+        "tools": false
     },
 
     "groq": {
@@ -289,77 +319,21 @@
             "base_url": "https://api.groq.com/openai/v1"
         },
         "models": {
-            "llama-3.3-70b-specdec": {
-                "input": 0.59,
-                "output": 0.99,
-                "context_window": 8000,
-                "tools": false,
-                "_checked": true
-            },
             "llama-3.3-70b-versatile": {
                 "input": 0.59,
                 "output": 0.79,
-                "context_window": 128000,
-                "tools": true,
-                "_checked": true
+                "context_window": 131072,
+                "max_tokens": 32768,
+                "tools": true
             },
             "llama-3.1-8b-instant": {
                 "input": 0.05,
                 "output": 0.08,
-                "context_window": 128000,
-                "tools": true,
-                "_checked": true
-            },
-            "llama-3.2-90b-vision-preview": {
-                "input": 0.90,
-                "output": 0.90,
-                "_checked": false,
-                "context_window": 8192,
-                "tools": false,
-                "_images": true,
-                "_checked": true
-            },
-            "deepseek-r1-distill-llama-70b": {
-                "input": 0.75,
-                "output": 0.99,
-                "context_window": 128000,
-                "tools": true,
-                "_checked": true
-            },
-            "deepseek-r1-distill-qwen-32b": {
-                "input": 0.69,
-                "output": 0.69,
-                "context_window": 128000,
-                "tools": true,
-                "_checked": true
-            },
-            "deepseek-r1-distill-qwen-32b": {
-                "tools": true,
-                "_checked": true
-            },
-            "qwen-qwq-32b": {
-                "input": 0.29,
-                "output": 0.39,
-                "context_window": 128000,
-                "tools": true,
-                "_checked": true
-            },
-            "qwen-2.5-coder-32b": {
-                "input": 0.79,
-                "output": 0.79,
-                "context_window": 128000,
-                "tools": true,
-                "_checked": true
-            },
-            "qwen-2.5-32b": {
-                "input": 0.79,
-                "output": 0.79,
-                "context_window": 128000,
-                "tools": true,
-                "_checked": true
+                "context_window": 131072,
+                "max_tokens": 131072,
+                "tools": true
             }
         },
-        "_todo": "check pricing",
         "enabled": true
     },
 
@@ -371,87 +345,54 @@
             "exclude_params": ["max_completion_tokens"]
         },
         "models": {
+            "moonshotai/Kimi-K2-Instruct": {
+                "input": 1.00,
+                "output": 3.00,
+                "context_window": 128000,
+                "quantization": "FP8",
+                "tools": true
+            },
+            "meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8": {
+                "input": 0.27,
+                "output": 0.85,
+                "context_window": 1048576,
+                "quantization": "FP8",
+                "tools": true
+            },
+            "meta-llama/Llama-4-Scout-17B-16E-Instruct": {
+                "input": 0.18,
+                "output": 0.59,
+                "context_window": 1048576,
+                "tools": true
+            },
             "meta-llama/Llama-3.3-70B-Instruct-Turbo": {
                 "input": 0.88,
                 "output": 0.88,
-                "tools": true
-            },
-            "meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo": {
-                "input": 0.88,
-                "output": 0.88,
-                "tools": true
-            },
-            "meta-llama/Meta-Llama-3.1-405B-Instruct-Turbo": {
-                "input": 3.50,
-                "output": 3.50,
-                "tools": true
-            },
-            "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo": {
-                "input": 0.18,
-                "output": 0.18,
+                "context_window": 131072,
+                "quantization": "FP8",
                 "tools": true
             },
             "meta-llama/Llama-3.2-3B-Instruct-Turbo": {
                 "input": 0.06,
                 "output": 0.06,
-                "tools": false
+                "context_window": 131072,
+                "tools": true
+            },
+            "Qwen/Qwen3-235B-A22B-fp8-tput": {
+                "input": 0.20,
+                "output": 0.60,
+                "context_window": 40960,
+                "quantization": "FP8",
+                "tools": true
             },
             "deepseek-ai/DeepSeek-V3": {
-	        "context_window": 131072,
-                "quantization": "FP8",
                 "input": 1.25,
                 "output": 1.25,
-                "tools": true,
-                "_checked": true
-            },
-            "deepseek-ai/DeepSeek-R1": {
-	        "context_window": 163840,
-	        "quantization": "FP8",
-                "input": 7.00,
-                "output": 7.00,
-                "tools": false,
-                "_checked": true
-            },
-            "meta-llama/Llama-Vision-Free": {
-	        "context_window": 131072,
-                "input": 0.00,
-                "output": 0.00,
-                "_images": true,
-                "_checked": true
-            },
-            "meta-llama/Llama-3.2-11B-Vision-Instruct-Turbo": {
-	        "context_window": 131072,
-                "input": 0.18,
-                "output": 0.18,
-                "_images": true,
-                "_checked": false
-            },
-            "meta-llama/Llama-3.2-90B-Vision-Instruct-Turbo": {
-	        "context_window": 131072,
-                "input": 0.88,
-                "output": 0.88,
-                "_images": true,
-                "_checked": false
-            },
-            "Qwen/Qwen2.5-72B-Instruct-Turbo": {
-	        "context_window": 32768,
-                "input": 1.20,
-                "output": 1.20,
-                "tools": true,
-                "_checked": false
-            },
-            "Qwen/Qwen2-VL-72B-Instruct": {
-	        "context_window": 32768,
-                "input": 1.20,
-                "output": 1.20,
-                "tools": false,
-                "_images": true,
-                "_checked": false
+	        "context_window": 163839,
+                "quantization": "FP8",
+                "tools": true
             }
-
         },
-        "_note": "tool calling fails",
-        "_todo": "all from https://docs.together.ai/docs/serverless-models",
         "enabled": true
     },
 
@@ -463,46 +404,47 @@
             "exclude_params": ["max_tokens"]
         },
         "models": {
-            "accounts/fireworks/models/deepseek-r1": {
+            "accounts/fireworks/models/deepseek-r1-0528": {
                 "input": 3.00,
                 "output": 8.00,
                 "context_window": 160000,
-                "tools": false,
-                "_checked": true
+                "tools": false
             },
-            "accounts/fireworks/models/deepseek-v3": {
-                "input": 0.75,
+            "accounts/fireworks/models/qwen3-235b-a22b": {
+                "input": 0.22,
+                "output": 0.88,
+                "context_window": 128000,
+                "tools": true
+            },
+            "accounts/fireworks/models/qwen3-30b-a3b": {
+                "input": 0.15,
+                "output": 0.60,
+                "context_window": 128000,
+                "tools": true
+            },
+            "accounts/fireworks/models/llama4-maverick-instruct-basic": {
+                "input": 0.22,
+                "output": 0.88,
+                "context_window": 1000000,
+                "tools": true
+            },
+            "accounts/fireworks/models/llama4-scout-instruct-basic": {
+                "input": 0.15,
+                "output": 0.60,
+                "context_window": 10000000,
+                "tools": true
+            },
+            "accounts/fireworks/models/deepseek-v3-0324": {
+                "input": 0.90,
+                "output": 0.90,
+                "context_window": 160000,
+                "tools": true
+            },
+            "accounts/fireworks/models/kimi-k2-instruct" : {
+                "input": 1.00,
                 "output": 3.00,
                 "context_window": 128000,
-                "tools": false,
-                "_note": "claimed that tools are enabled: https://fireworks.ai/blog/function-calling-deepseekv3",
-                "_checked": false
-            },
-            "accounts/fireworks/models/llama-v3p2-90b-vision-instruct": {
-                "input": 0.90,
-                "output": 0.90,
-                "_images": true
-            },
-            "accounts/fireworks/models/llama-v3p1-405b-instruct": {
-                "input": 3.00,
-                "output": 3.00,
-                "context_window": 128000,
-                "tools": true,
-                "_checked": true
-            },
-            "accounts/fireworks/models/llama-v3p1-70b-instruct": {
-                "input": 0.90,
-                "output": 0.90,
-                "context_window": 128000,
-                "tools": true,
-                "_checked": true
-            },
-            "accounts/fireworks/models/qwen2p5-72b-instruct": {
-                "input": 0.90,
-                "output": 0.90,
-                "context_window": 32000,
-                "tools": true,
-                "_checked": true
+                "tools": true
             }
         },
         "enabled": true
@@ -515,74 +457,15 @@
             "base_url": "https://api.deepinfra.com/v1/openai"
         },
         "models": {
-            "deepseek-ai/DeepSeek-V3": {
-                "input": 0.49,
-                "output": 0.89,
-                "context_window": 65536,
-                "quantization": "fp8",
-                "tools": true,
-                "_checked": true
-            },
-            "deepseek-ai/DeepSeek-R1": {
-                "input": 0.75,
-                "output": 2.40,
-                "context_window": 65536,
-                "quantization": "fp8",
-                "tools": true,
-                "_checked": true
-            },
-            "deepseek-ai/DeepSeek-R1-Turbo": {
-                "input": 2.00,
-                "output": 6.00,
-                "context_window": 32768,
-                "quantization": "fp4",
-                "tools": true,
-                "_checked": true
-            },
-            "deepseek-ai/DeepSeek-R1-Distill-Llama-70B": {
-                "input": 0.23,
-                "output": 0.69,
-                "context_window": 131072,
-                "quantization": "bfloat16",
-                "tools": false,
-                "_checked": true
-            },
-            "meta-llama/Llama-3.3-70B-Instruct": {
-                "input": 0.23,
-                "output": 0.40,
-                "context_window": 131072,
-                "tools": true,
-                "quantization": "bfloat16",
-                "_checked": true
-            },
-            "meta-llama/Llama-3.3-70B-Instruct-Turbo": {
-                "input": 0.12,
-                "output": 0.30,
-                "context_window": 131072,
-                "tools": true,
-                "quantization": "fp8",
-                "_checked": true
-            },
-            "meta-llama/Llama-3.2-90B-Vision-Instruct": {
-                "input": 0.35,
-                "output": 0.40,
-                "context_window": 32768,
-                "quantization": "bf16",
-                "_checked": true
-            },
-            "Qwen/QwQ-32B": {
-                "input": 0.12,
-                "output": 0.18,
-                "context_window": 131072,
-                "quantization": "bf16",
-                "tools": true,
-                "_note": "actually might just be json structured output not full tools",
-                "_checked": true
+            "moonshotai/Kimi-K2-Instruct": {
+                "input": 0.55,
+                "output": 2.20,
+                "context_window": 120000,
+                "quantization": "FP4",
+                "tools": true
             }
-
         },
-        "_note": "tool use erroring, no tool calls when stremaing, rejects tool result reposne when non streaming",
-        "enabled": true
+        "enabled": false
     },
 
     "novita": {
@@ -592,40 +475,18 @@
             "base_url": "https://api.novita.ai/v3/openai"
         },
         "models": {
-            "deepseek/deepseek_v3": {
-                "input": 0.89,
-                "output": 0.89,
-                "context_window": 64000,
-                "tools": false,
-                "json": true,
-                "_note": "docs claim json structured output support, and that you must instruct the model to do so",
-                "_checked": false
+            "moonshotai/kimi-k2-instruct": {
+                "input": 0.57,
+                "output": 2.30,
+                "context_window": 131072,
+                "tools": true
             },
-            "deepseek/deepseek-v3-turbo": {
-                "input": 0.40,
-                "output": 1.30,
-                "context_window": 64000,
-                "tools": false,
-                "json": true,
-                "_note": "docs claim json structured output support, and that you must instruct the model to do so",
-                "_checked": false
+            "deepseek/deepseek-v3-0324": {
+                "input": 0.28,
+                "output": 1.14,
+                "context_window": 163840,
+                "tools": true
             }
-        },
-        "_todo": "more models here: https://novita.ai/models",
-        "enabled": true
-    },
-
-    "hugging_face": {
-        "executor": "HuggingFaceExecutor",
-        "connection": {
-            "api_key_env_var": "HUGGING_FACE_INFERENCE_API_KEY"
-        },
-        "models": {
-            "mistralai/Mistral-7B-Instruct-v0.3": { "input": 0.00, "output": 0.00 },
-            "Qwen/Qwen2.5-72B-Instruct": { "input": 0.00, "output": 0.00 },
-            "Qwen/QwQ-32B-Preview": { "input": 0.00, "output": 0.00 },
-            "google/gemma-2-9b-it": { "input": 0.00, "output": 0.00 },
-            "microsoft/Phi-3.5-mini-instruct": { "input": 0.00, "output": 0.00 }
         },
         "enabled": false
     }
