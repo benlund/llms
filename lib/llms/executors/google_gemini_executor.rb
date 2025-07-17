@@ -102,7 +102,7 @@ module LLMs
         parser = Parsers::GoogleGeminiChatResponseStreamParser.new(emitter)
 
         params = request_params.merge(stream: Proc.new { |chunk| parser.add_data(chunk) })
-        http_response = @client.generate_content(@model_name, @formatted_messages, params)        
+        http_response = @client.generate_content(@model_name, @formatted_messages, params)
 
         @last_received_message_id = parser.current_message_id ##no message id in the response
 
@@ -143,7 +143,7 @@ module LLMs
         input_tokens = response['usageMetadata']['promptTokenCount']
         output_tokens = response['usageMetadata']['candidatesTokenCount']
 
-        { 
+        {
           input_tokens: input_tokens,
           output_tokens: output_tokens,
           execution_time: execution_time,
