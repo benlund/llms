@@ -42,18 +42,18 @@ OptionParser.new do |opts|
   opts.on("--thinking-max-tokens N", Integer, "Set max tokens for thinking mode (default: #{options[:thinking_max_tokens]})") do |n|
     options[:thinking_max_tokens] = n
   end
+
+  opts.on("-l", "--list-models", "List available models") do
+    options[:list_models] = true
+  end
+
+  opts.on("-q", "--quiet", "Don't print connetion or usage info") do
+    options[:quiet] = true
+  end
+
 end.parse!
 
-executor = LLMs::Executors.instance(
-  model_name: options[:model],
-  temperature: TEMPERATURE,
-  max_tokens: options[:max_tokens],
-  thinking: options[:thinking],
-  thinking_max_tokens: options[:thinking_max_tokens]
-)
-
 def run_chat(executor, options)
-  puts executor.model_name
   conversation = LLMs::Conversation.new
   conversation.set_system_message(options[:system_prompt])
 
@@ -79,15 +79,16 @@ def run_chat(executor, options)
       $stderr.puts "Error: #{error.inspect}"
     end
 
-    usage = executor.last_usage_data
-    $stderr.puts "Usage: #{usage}"
+    unless options[:quiet]
+      usage = executor.last_usage_data
+      puts "Usage: #{usage}"
+    end
 
     conversation.add_assistant_message(executor.last_received_message)
   end
 end
 
 def run_prompt(executor, prompt, options)
-  puts executor.model_name
   if options[:stream]
     #executor.execute_prompt(prompt.strip, system_prompt: options[:system_prompt]) { |chunk| print chunk }
     executor.execute_prompt(prompt.strip) { |chunk| print chunk }
@@ -101,12 +102,32 @@ def run_prompt(executor, prompt, options)
     $stderr.puts "Error: #{error.inspect}"
   end
 
-  usage = executor.last_usage_data
-  $stderr.puts "Usage: #{usage}"
+  unless options[:quiet]
+    usage = executor.last_usage_data
+    puts "Usage: #{usage}"
+  end
 end
 
-if ARGV.empty?
-  run_chat(executor, options)
+def list_models
+  puts LLMs::Models.list_model_names
+end
+
+if options[:list_models]
+  list_models
 else
-  run_prompt(executor, ARGV.join(' '), options)
+  executor = LLMs::Executors.instance(
+    model_name: options[:model],
+    temperature: TEMPERATURE,
+    max_tokens: options[:max_tokens],
+    thinking: options[:thinking],
+    thinking_max_tokens: options[:thinking_max_tokens]
+  )
+  unless options[:quiet]
+    puts "Connected to: #{executor.model_name} (#{executor.class.name})"
+  end
+  if ARGV.empty?
+    run_chat(executor, options)
+  else
+    run_prompt(executor, ARGV.join(' '), options)
+  end
 end

@@ -46,6 +46,7 @@ def main
     end
   end.parse!
 
+  ##todo exclude models tat explicitly don't wupport tools
   models = LLMs::Models.list_model_names(full: true)# , latest: options[:latest]) ##@@ TODO support this
   if ARGV[0]
     models = models.select { |name| name.include?(ARGV[0]) }
