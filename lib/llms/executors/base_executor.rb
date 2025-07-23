@@ -128,6 +128,8 @@ module LLMs
 
         cost_components = []
 
+        ##@@ TODO simplify below
+
         if input_tokens > 0 && @pricing[:input]
           cost_components << {
             name: "input",

@@ -151,14 +151,20 @@ module LLMs
         ]
       end
 
-      def calculate_usage(response, execution_time)
-        usage_metadata = response['usageMetadata']
-        if usage_metadata
+      def calculate_usage(response, execution_time)        
+        input_tokens = 0
+        output_tokens = 0
+
+        ## TODO support cache read/write tokens
+
+        if usage_metadata = response['usageMetadata']
           input_tokens = usage_metadata['promptTokenCount']
-          output_tokens = usage_metadata['candidatesTokenCount']
-        else
-          input_tokens = 0
-          output_tokens = 0
+          if usage_metadata['thoughtsTokenCount']
+            output_tokens = usage_metadata['thoughtsTokenCount']
+          end
+          if usage_metadata['candidatesTokenCount']
+            output_tokens = usage_metadata['candidatesTokenCount']
+          end
         end
 
         {
