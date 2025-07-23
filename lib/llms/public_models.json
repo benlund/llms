@@ -4,6 +4,7 @@
         "executor": "AnthropicExecutor",
         "api_key_env_var": "ANTHROPIC_API_KEY",
         "tools": true,
+        "vision": true,
         "models": {
             "claude-opus-4-20250514": {
                 "aliases": ["claude-opus-4-0"],
@@ -490,6 +491,7 @@
         "api_key_env_var": "FIREWORKS_API_KEY",
         "base_url": "https://api.fireworks.ai/inference/v1",
         "exclude_params": ["max_tokens"],
+        "vision": true,
         "models": {
             "accounts/fireworks/models/deepseek-r1-0528": {
                 "pricing": {
@@ -506,7 +508,8 @@
                     "output": 0.88
                 },
                 "context_window": 128000,
-                "tools": true
+                "tools": true,
+                "vision": false
             },
             "accounts/fireworks/models/qwen3-30b-a3b": {
                 "pricing": {
@@ -514,7 +517,8 @@
                     "output": 0.60
                 },
                 "context_window": 128000,
-                "tools": true
+                "tools": true,
+                "vision": false
             },
             "accounts/fireworks/models/llama4-maverick-instruct-basic": {
                 "pricing": {
@@ -547,7 +551,8 @@
                     "output": 3.00
                 },
                 "context_window": 128000,
-                "tools": true
+                "tools": true,
+                "vision": false
             }
         }
     },

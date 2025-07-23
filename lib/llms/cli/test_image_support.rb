@@ -10,7 +10,7 @@ module LLMs
 
       def default_options
         super.merge({
-          max_completion_tokens: 1000, ## TODO grok 4 needs much more than 100 - fix @@ - still no reply wih 1000 fix me @@
+          max_completion_tokens: 1000, ## TODO grok 4 and gemini-2.5-pro needs much more than 100 - fix @@ - still no reply wih 1000 fix me @@
           prompt: "What is in this picture?",
           system_prompt: "Always reply in Latin"
         })
@@ -75,8 +75,7 @@ module LLMs
       end
 
       def get_models_to_test
-        ##@@ TODO require vision capabilit in models (assume all do unless explicitly stated that they don't)
-        models = LLMs::Models.list_model_names(full: true)
+        models = LLMs::Models.list_model_names(full: true, require_vision: true)
 
         # Filter by model name if provided
         if ARGV[0]
