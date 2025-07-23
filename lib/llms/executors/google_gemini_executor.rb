@@ -110,12 +110,24 @@ module LLMs
       end
 
       def request_params
-        {
-          generationConfig: {
-            temperature: @temperature,
-            maxOutputTokens: @max_tokens,
-          }
-        }.tap do |params|
+        generation_config = { temperature: @temperature }.tap do |config|
+          if @max_tokens
+            config[:maxOutputTokens] = @max_tokens
+          end
+          # Will override max_tokens if both are provided
+          if @max_completion_tokens
+            config[:maxOutputTokens] = @max_completion_tokens
+          end
+          if @thinking_mode
+            config[:thinkingConfig] = { includeThoughts: true }.tap do |thinking_config|
+              if @max_thinking_tokens
+                thinking_config[:thinkingBudget] = @max_thinking_tokens
+              end
+            end
+          end
+        end
+
+        { generationConfig: generation_config }.tap do |params|
           if @system_prompt
             params[:system_instruction] = { parts: [{text: @system_prompt}] }
           end
@@ -140,8 +152,14 @@ module LLMs
       end
 
       def calculate_usage(response, execution_time)
-        input_tokens = response['usageMetadata']['promptTokenCount']
-        output_tokens = response['usageMetadata']['candidatesTokenCount']
+        usage_metadata = response['usageMetadata']
+        if usage_metadata
+          input_tokens = usage_metadata['promptTokenCount']
+          output_tokens = usage_metadata['candidatesTokenCount']
+        else
+          input_tokens = 0
+          output_tokens = 0
+        end
 
         {
           input_tokens: input_tokens,
@@ -152,9 +170,7 @@ module LLMs
       end
 
       def initialize_client
-        ##@@ TODO api_key_env_var = @model_info[:api_key_env_var]
-        raise "Google Gemini API key not set" if ENV['GOOGLE_GEMINI_API_KEY'].nil?
-        @client = LLMs::APIs::GoogleGeminiAPI.new(ENV['GOOGLE_GEMINI_API_KEY'])
+        @client = LLMs::APIs::GoogleGeminiAPI.new(fetch_api_key)
       end
 
     end

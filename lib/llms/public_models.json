@@ -1,9 +1,9 @@
 {
     "anthropic": {
+        "enabled": true,
         "executor": "AnthropicExecutor",
-        "connection": {
-            "api_key_env_var": "ANTHROPIC_API_KEY"
-        },
+        "api_key_env_var": "ANTHROPIC_API_KEY",
+        "tools": true,
         "models": {
             "claude-opus-4-20250514": {
                 "aliases": ["claude-opus-4-0"],
@@ -89,16 +89,16 @@
                 "context_window": 200000,
                 "max_output": 4096
             }
-        },
-        "tools": true,
-        "enabled": true
+        }
     },
 
     "google": {
+        "enabled": true,
         "executor": "GoogleGeminiExecutor",
-        "connection": {
-            "api_key_env_var": "GOOGLE_GEMINI_API_KEY"
-        },
+        "api_key_env_var": "GOOGLE_GEMINI_API_KEY",
+        "tools": true,
+        "vision": true,
+        "_TODO": "check all below do support vision; mark which do not support thinking",
         "models": {
             "gemini-2.5-pro": {
                 "latest": true,
@@ -115,7 +115,6 @@
                 "output": 1.00,
                 "cache_write_1mt/hr": 1.00,
                 "cache_read": 0.075,
-                "context_window": 1048576,
                 "context_window": 1048576,
                 "max_output": 65536
             },
@@ -166,68 +165,70 @@
                 "context_window": 1048576,
                 "max_output": 8192
             }
-        },
-        "tools": true,
-        "enabled": true
+        }
     },
 
     "xai": {
+        "enabled": true,
         "executor": "OpenAICompatibleExecutor",
-        "connection": {
-            "api_key_env_var": "XAI_API_KEY",
-            "base_url": "https://api.x.ai/v1"
-        },
+        "api_key_env_var": "XAI_API_KEY",
+        "base_url": "https://api.x.ai/v1",
+        "tools": true,
         "models": {
             "grok-4-0709": {
                 "latest": true,
                 "input": 3.00,
                 "output": 15.00,
-                "context_window": 256000
+                "context_window": 256000,
+                "vision": true
             },
             "grok-3": {
                 "input": 3.00,
                 "output": 15.00,
-                "context_window": 131072
+                "context_window": 131072,
+                "vision": false
             },
             "grok-3-mini": {
                 "latest": true,
                 "input": 0.30,
                 "output": 0.50,
-                "context_window": 131072
+                "context_window": 131072,
+                "vision": false
             },
             "grok-3-fast": {
                 "input": 5.00,
                 "output": 25.00,
-                "context_window": 131072
+                "context_window": 131072,
+                "vision": false
             },
             "grok-3-mini-fast": {
                 "latest": true,
                 "input": 0.60,
                 "output": 4.00,
-                "context_window": 131072
+                "context_window": 131072,
+                "vision": false
             },
             "grok-2-1212": {
                 "input": 2.00,
                 "output": 10.00,
-                "context_window": 131072
+                "context_window": 131072,
+                "vision": false
             },
             "grok-2-vision-1212": {
                 "input": 2.00,
                 "output": 10.00,
-                "context_window": 32768
+                "context_window": 32768,
+                "vision": true
             }
-        },
-        "tools": true,
-        "enabled": true
+        }
     },
 
     "cerebras": {
+        "enabled": true,
         "executor": "OpenAICompatibleExecutor",
-        "connection": {
-            "api_key_env_var": "CEREBRAS_API_KEY",
-            "base_url": "https://api.cerebras.ai/v1",
-            "exclude_params": ["max_tokens"]
-        },
+        "api_key_env_var": "CEREBRAS_API_KEY",
+        "base_url": "https://api.cerebras.ai/v1",
+        "exclude_params": ["max_tokens"],
         "models": {
             "llama-4-scout-17b-16e-instruct": {
                 "input": 0.65,
@@ -261,26 +262,27 @@
                 "tools": true,
                 "enabled": false
             }
-        },
-        "enabled": true
+        }
     },
 
     "hyperbolic": {
+        "enabled": true,
         "executor": "OpenAICompatibleExecutor",
-        "connection": {
-            "api_key_env_var": "HYPERBOLIC_API_KEY",
-            "base_url": "https://api.hyperbolic.xyz/v1"
-        },
+        "api_key_env_var": "HYPERBOLIC_API_KEY",
+        "base_url": "https://api.hyperbolic.xyz/v1",
+        "tools": false,
         "models": {
             "moonshotai/Kimi-K2-Instruct": {
                 "input": 2.00,
                 "output": 2.00,
-                "context_window": 131069
+                "context_window": 131069,
+                "vision": false
             },
             "deepseek-ai/DeepSeek-R1-0528": {
                 "input": 3.00,
                 "output": 3.00,
-                "context_window": 163840
+                "context_window": 163840,
+                "vision": false
             },
             "Qwen/Qwen3-235B-A22B": {
                 "input": 0.40,
@@ -290,34 +292,35 @@
             "deepseek-ai/DeepSeek-V3-0324": {
                 "input": 1.25,
                 "output": 1.25,
-                "context_window": 131069
+                "context_window": 131069,
+                "vision": false
             },
             "Qwen/QwQ-32B": {
                 "input": 0.40,
                 "output": 0.40,
-                "context_window": 131069
+                "context_window": 131069,
+                "vision": false
             },
             "meta-llama/Llama-3.3-70B-Instruct": {
                 "input": 0.40,
                 "output": 0.40,
-                "context_window": 131069
+                "context_window": 131069,
+                "vision": false
             },
             "Qwen/Qwen2.5-Coder-32B-Instruct": {
                 "input": 0.2,
                 "output": 0.2,
-                "context_window": 131072
+                "context_window": 131072,
+                "vision": false
             }
-        },
-        "enabled": true,
-        "tools": false
+        }
     },
 
     "groq": {
+        "enabled": true,
         "executor": "OpenAICompatibleExecutor",
-        "connection": {
-            "api_key_env_var": "GROQ_API_KEY",
-            "base_url": "https://api.groq.com/openai/v1"
-        },
+        "api_key_env_var": "GROQ_API_KEY",
+        "base_url": "https://api.groq.com/openai/v1",
         "models": {
             "llama-3.3-70b-versatile": {
                 "input": 0.59,
@@ -333,17 +336,15 @@
                 "max_tokens": 131072,
                 "tools": true
             }
-        },
-        "enabled": true
+        }
     },
 
     "together": {
+        "enabled": true,
         "executor": "OpenAICompatibleExecutor",
-        "connection": {
-            "api_key_env_var": "TOGETHER_API_KEY",
-            "base_url": "https://api.together.xyz/v1",
-            "exclude_params": ["max_completion_tokens"]
-        },
+        "api_key_env_var": "TOGETHER_API_KEY",
+        "base_url": "https://api.together.xyz/v1",
+        "exclude_params": ["max_completion_tokens"],
         "models": {
             "moonshotai/Kimi-K2-Instruct": {
                 "input": 1.00,
@@ -392,23 +393,22 @@
                 "quantization": "FP8",
                 "tools": true
             }
-        },
-        "enabled": true
+        }
     },
 
     "fireworks": {
+        "enabled": true,
         "executor": "OpenAICompatibleExecutor",
-        "connection": {
-            "api_key_env_var": "FIREWORKS_API_KEY",
-            "base_url": "https://api.fireworks.ai/inference/v1",
-            "exclude_params": ["max_tokens"]
-        },
+        "api_key_env_var": "FIREWORKS_API_KEY",
+        "base_url": "https://api.fireworks.ai/inference/v1",
+        "exclude_params": ["max_tokens"],
         "models": {
             "accounts/fireworks/models/deepseek-r1-0528": {
                 "input": 3.00,
                 "output": 8.00,
                 "context_window": 160000,
-                "tools": false
+                "tools": false,
+                "vision": false
             },
             "accounts/fireworks/models/qwen3-235b-a22b": {
                 "input": 0.22,
@@ -438,7 +438,8 @@
                 "input": 0.90,
                 "output": 0.90,
                 "context_window": 160000,
-                "tools": true
+                "tools": true,
+                "vision": false
             },
             "accounts/fireworks/models/kimi-k2-instruct" : {
                 "input": 1.00,
@@ -446,16 +447,14 @@
                 "context_window": 128000,
                 "tools": true
             }
-        },
-        "enabled": true
+        }
     },
 
     "deepinfra": {
+        "enabled": false,
         "executor": "OpenAICompatibleExecutor",
-        "connection": {
-            "api_key_env_var": "DEEPINFRA_API_KEY",
-            "base_url": "https://api.deepinfra.com/v1/openai"
-        },
+        "api_key_env_var": "DEEPINFRA_API_KEY",
+        "base_url": "https://api.deepinfra.com/v1/openai",
         "models": {
             "moonshotai/Kimi-K2-Instruct": {
                 "input": 0.55,
@@ -464,16 +463,14 @@
                 "quantization": "FP4",
                 "tools": true
             }
-        },
-        "enabled": false
+        }
     },
 
     "novita": {
+        "enabled": false,
         "executor": "OpenAICompatibleExecutor",
-        "connection": {
-            "api_key_env_var": "NOVITA_API_KEY",
-            "base_url": "https://api.novita.ai/v3/openai"
-        },
+        "api_key_env_var": "NOVITA_API_KEY",
+        "base_url": "https://api.novita.ai/v3/openai",
         "models": {
             "moonshotai/kimi-k2-instruct": {
                 "input": 0.57,
@@ -487,7 +484,6 @@
                 "context_window": 163840,
                 "tools": true
             }
-        },
-        "enabled": false
+        }
     }
 }

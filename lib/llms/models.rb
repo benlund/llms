@@ -1,140 +1,174 @@
 require 'json'
+require_relative 'models/provider'
+require_relative 'models/model'
 
 module LLMs
   module Models
-    MODEL_REGISTRY = {}
-    MODEL_PROVIDERS = {}
 
-    def self.register_model(provider, model, pricing, tools: nil, enabled: true)
-      provider_sym = provider.to_sym
-      raise "Unknown provider: #{provider_sym}" unless MODEL_REGISTRY.key?(provider_sym)
+    DEFAULT_MODEL = 'claude-sonnet-4-0'
 
-      MODEL_REGISTRY[provider_sym][:models][model] ||= {}
-      MODEL_REGISTRY[provider_sym][:models][model] = {
-        model_name: model,
-        pricing: pricing.transform_keys(&:to_sym),
-        tools: tools,
-        enabled: !!enabled
-      }
+    PROVIDER_REGISTRY = {}
+    PROVIDER_TO_MODEL_REGISTRY = {}
+    MODEL_TO_PROVIDER_REGISTRY = {}
+    ALIAS_REGISTRY = {}
 
-      MODEL_PROVIDERS[model] ||= Set.new
-      MODEL_PROVIDERS[model] << provider_sym
+    def self.register_model(provider_name, model_name, pricing: nil, tools: nil, vision: nil, thinking: nil, enabled: nil, aliases: nil)
+      provider = PROVIDER_REGISTRY[provider_name.to_s]
+      raise "Unknown provider: #{provider_name}" unless provider
+
+      model = LLMs::Models::Model.new(
+        model_name,
+        provider,
+        pricing:,
+        supports_tools: tools,
+        supports_vision: vision,
+        supports_thinking: thinking,
+        enabled: enabled
+      )
+
+      PROVIDER_TO_MODEL_REGISTRY[provider.provider_name] ||= {}
+      PROVIDER_TO_MODEL_REGISTRY[provider.provider_name][model.model_name] = model
+
+      MODEL_TO_PROVIDER_REGISTRY[model.model_name] ||= Set.new
+      MODEL_TO_PROVIDER_REGISTRY[model.model_name] << provider.provider_name
+
+      if aliases
+        aliases.each do |alias_name|
+          if aliased_model_name = ALIAS_REGISTRY[alias_name]
+            raise "Alias #{alias_name} already registered for #{aliased_model_name}"
+          end
+          ALIAS_REGISTRY[alias_name] = model.model_name
+        end
+      end
 
       model
     end
 
-    def self.register_models(provider, models)
-      models.each do |model, info|
-        mi = info.transform_keys(&:to_sym)
-        pricing = mi.slice(:input, :output) ##@@ TODO cache info here too
-        tools = mi[:tools]
-        enabled = mi.key?(:enabled) ? mi[:enabled] : true
-        register_model(provider, model, pricing, tools:, enabled:)
-      end
+    def self.register_provider(provider_name, executor_class_name, base_url: nil, api_key_env_var: nil, tools: nil, vision: nil, thinking: nil, enabled: nil, exclude_params: nil)
+      provider = LLMs::Models::Provider.new(
+        provider_name,
+        executor_class_name,
+        base_url:,
+        api_key_env_var:,
+        supports_tools: tools,
+        supports_vision: vision,
+        supports_thinking: thinking,
+        enabled:,
+        exclude_params:
+      )
+
+      PROVIDER_REGISTRY[provider.provider_name] = provider
     end
 
-    def self.register_provider(provider, executor, connection_info, tools: nil, enabled: true)
-      raise ArgumentError, "executor can't be nil" if executor.nil?
-      raise ArgumentError, "connection_info can't be nil" if connection_info.nil?
+    def self.disable_model(provider_name, model_name)
+      provider = PROVIDER_REGISTRY[provider_name.to_s]
+      raise "Unknown provider: #{provider_name}" unless provider
 
-      MODEL_REGISTRY[provider.to_sym] ||= {}
-      MODEL_REGISTRY[provider.to_sym] = {
-        executor: executor,
-        connection: connection_info.transform_keys(&:to_sym),
-        models: {},
-        tools: tools,
-        enabled: !!enabled
-      }
+      model = PROVIDER_TO_MODEL_REGISTRY[provider.provider_name][model_name]
+      raise "Unknown model: #{model_name}" unless model
+
+      model.enabled = false
     end
 
-    def self.disable_model(provider, model_name)
-      MODEL_REGISTRY[provider.to_sym][:models][model_name][:enabled] = false
+    def self.enable_model(provider_name, model_name)
+      provider = PROVIDER_REGISTRY[provider_name.to_s]
+      raise "Unknown provider: #{provider_name}" unless provider
+
+      model = PROVIDER_TO_MODEL_REGISTRY[provider.provider_name][model_name]
+      raise "Unknown model: #{model_name}" unless model
+
+      model.enabled = true
     end
 
-    def self.enable_model(provider, model_name)
-      MODEL_REGISTRY[provider.to_sym][:models][model_name][:enabled] = true
+    def self.disable_provider(provider_name)
+      provider = PROVIDER_REGISTRY[provider_name.to_s]
+      raise "Unknown provider: #{provider_name}" unless provider
+
+      provider.enabled = false
+    end 
+
+    def self.enable_provider(provider_name)
+      provider = PROVIDER_REGISTRY[provider_name.to_s]
+      raise "Unknown provider: #{provider_name}" unless provider
+
+      provider.enabled = true
     end
 
-    def self.disable_provider(provider)
-      MODEL_REGISTRY[provider.to_sym][:enabled] = false
-    end
-
-    def self.enable_provider(provider)
-      MODEL_REGISTRY[provider.to_sym][:enabled] = true
-    end
-
-    ##@@ TODO fix and simplify
     def self.load_models_file(file_path)
-      JSON.parse(File.read(file_path)).each do |provider, info|
-        register_provider(provider, info['executor'], info['connection'], tools: info['tools'], enabled: info['enabled'])
-        register_models(provider, info['models'])
+      JSON.parse(File.read(file_path)).each do |provider_name, info|
+        executor_class_name = info['executor']
+        params = info.slice('base_url', 'api_key_env_var', 'tools', 'vision', 'thinking', 'enabled', 'exclude_params').transform_keys(&:to_sym)
+        register_provider(provider_name, executor_class_name, **params)
+
+        info['models'].each do |model_name, model_info|
+          params = model_info.slice('pricing', 'tools', 'vision', 'thinking', 'enabled', 'aliases').transform_keys(&:to_sym)
+          register_model(provider_name, model_name, **params)
+        end
       end
     end
 
     load_models_file(File.join(File.dirname(__FILE__), 'public_models.json'))
 
-    def self.find_model_info(model_name, include_disabled = false)
-      candidate_providers = MODEL_PROVIDERS[model_name].to_a
+    def self.find_model(model_name, include_disabled = false)
+      lookup_model_name = (ALIAS_REGISTRY[model_name] || model_name).to_s
+
+      candidate_providers = MODEL_TO_PROVIDER_REGISTRY[lookup_model_name].to_a
 
       if 1 == candidate_providers.size
-        find_model_info_for_provider(candidate_providers[0], model_name, include_disabled)
+        find_model_for_provider(candidate_providers[0], lookup_model_name, include_disabled)
       elsif candidate_providers.size > 1
         raise "Multiple providers match #{model_name}: #{candidate_providers.join(', ')}"
       else
         if model_name.include?(':')
           provider_part, model_name_part = model_name.split(':', 2)
-          find_model_info_for_provider(provider_part, model_name_part, include_disabled)
+          find_model_for_provider(provider_part, model_name_part, include_disabled)
         else
           nil
         end
       end
     end
 
-    def self.find_model_info_for_provider(provider, model_name, include_disabled = false)
-      provider_sym = provider.to_sym
-      raise "Unknown provider: #{provider_sym}" unless MODEL_REGISTRY.key?(provider_sym)
+    def self.find_model_for_provider(provider_name, model_name, include_disabled = false)
+      provider = PROVIDER_REGISTRY[provider_name.to_s]
+      raise "Unknown provider: #{provider_name}" unless provider
 
-      provider_info = MODEL_REGISTRY[provider_sym]
+      return nil unless provider.is_enabled? || include_disabled
 
-      if provider_info[:enabled] || include_disabled
-        if model_info = provider_info[:models][model_name]
-          if model_info[:enabled] || include_disabled
-            return model_info.merge(provider_info.slice(:executor, :connection, :enabled))
+      model = PROVIDER_TO_MODEL_REGISTRY[provider.provider_name][model_name]
+      if !model.nil? && (model.is_enabled? || include_disabled)
+        model
+      else
+        nil
+      end
+    end
+
+    def self.list_model_names(full: true, require_tools: false, require_vision: false, require_thinking: false, include_disabled: false)
+      ok_model_names = []
+      PROVIDER_REGISTRY.each do |provider_name, provider|
+        provider_ok_for_enabled = include_disabled || provider.is_enabled?
+        provider_ok_for_tools = !require_tools || provider.possibly_supports_tools?
+        provider_ok_for_vision = !require_vision || provider.possibly_supports_vision?
+        provider_ok_for_thinking = !require_thinking || provider.possibly_supports_thinking?
+        
+        if provider_ok_for_enabled && provider_ok_for_tools && provider_ok_for_vision && provider_ok_for_thinking
+          PROVIDER_TO_MODEL_REGISTRY[provider.provider_name].each do |_, model|
+            model_ok_for_enabled = include_disabled || model.is_enabled?
+            model_ok_for_tools = !require_tools || (model.certainly_supports_tools?)
+            model_ok_for_vision = !require_vision || (model.certainly_supports_vision?)
+            model_ok_for_thinking = !require_thinking || (model.certainly_supports_thinking?)
+
+            if model_ok_for_enabled && model_ok_for_tools && model_ok_for_vision && model_ok_for_thinking
+              if full
+                ok_model_names << "#{provider_name}:#{model.model_name}"
+              else
+                ok_model_names << model.model_name
+              end
+            end
           end
         end
       end
 
-      nil
-    end
-
-    def self.list_model_names(full: true, require_tools: false, include_disabled: false)
-      MODEL_REGISTRY.select do |provider, info|
-        (info[:enabled] || include_disabled) && (!require_tools || (info[:tools] != false))
-      end.flat_map do |provider, info|
-        info[:models].select do |_, model_info|
-          (model_info[:enabled] || include_disabled) && (!require_tools || (model_info[:tools] != false))
-        end.keys.map do |short_name|
-          if full
-            "#{provider}:#{short_name}"
-          else
-            short_name
-          end
-        end
-      end.sort
-    end
-
-    def self.model_name_exists?(model_name)
-      begin
-        !find_model_info(model_name).nil?
-      rescue StandardError => e
-        false
-      end
-    end
-
-    def self.search_model_names(model_name_substring, include_disabled: false)
-      list_model_names(include_disabled:).select do |model_name|
-        model_name.include?(model_name_substring)
-      end
+      ok_model_names.sort
     end
 
   end

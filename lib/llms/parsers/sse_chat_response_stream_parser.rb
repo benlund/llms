@@ -39,16 +39,15 @@ module LLMs
           if data == '[DONE]'
             handle_done
           else
-            begin
-              json = JSON.parse(data)
-              handle_json(json)
-            rescue JSON::ParserError => e
-              ##@@ TODO raise here?
-              puts "Error parsing JSON: #{e.message}"
-              puts "Data: #{data}"
-            end
+            json = parse_line_data(data)
+            handle_json(json)
           end
         end
+      end
+
+      # Override in subclasses to rescue JSON parse errors if needed for the provider (shouldn't actually be needed for any?)
+      def parse_line_data(data)
+        JSON.parse(data)
       end
 
       def handle_json(json)
@@ -56,7 +55,7 @@ module LLMs
       end
 
       def handle_done
-        # Override in subclasses if needed @@ TODO
+        # Override in subclasses if needed
       end
 
       private

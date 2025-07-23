@@ -109,12 +109,17 @@ module LLMs
       def request_params(is_stream = false)
         {temperature: @temperature}.tap do |params|
 
-          if param_ok?(:max_tokens)
+          if param_ok?(:max_tokens) && @max_tokens
             params[:max_tokens] = @max_tokens
           end
 
-          if param_ok?(:max_completion_tokens)
-            params[:max_completion_tokens] = @max_tokens
+          ## Will override max_tokens if both are provided
+          if param_ok?(:max_completion_tokens) && @max_completion_tokens
+            params[:max_completion_tokens] = @max_completion_tokens
+          end
+
+          if @thinking_effort
+            params[:reasoning_effort] = @thinking_effort
           end
 
           if @available_tools && @available_tools.any?
@@ -130,38 +135,15 @@ module LLMs
       end
 
       def param_ok?(param_name)
-        !@model_info.dig(:connection, :exclude_params)&.find { |param| param.to_s == param_name.to_s }
+        !@exclude_params&.find { |param| param.to_s == param_name.to_s }
       end
 
       def initialize_client
-        if @model_info.nil? || @model_info.empty?
-          raise "model info required for OpenAICompatibleExecutor"
+        if @base_url.nil? || @base_url.empty?
+          raise "base_url required for OpenAICompatibleExecutor"
         end
 
-        connection_config = @model_info[:connection]
-
-        if connection_config.nil?
-          raise "model info :connection config not found for model #{@model_name}"
-        end
-
-        base_url = @base_url || connection_config[:base_url]
-        if base_url.nil?
-          raise "model info :base_url not found for model #{@model_name}"
-        end
-
-        api_key = connection_config[:api_key]
-        if api_key.nil?
-          env_var_name = connection_config[:api_key_env_var]
-          if env_var_name.nil?
-            raise "model info :api_key or :api_key_env_var not found for model #{@model_name}"
-          end
-          api_key = ENV[env_var_name]
-          if api_key.nil?
-            raise "api key env var #{env_var_name} not set for model #{@model_name}"
-          end
-        end
-
-        @client = LLMs::APIs::OpenAICompatibleAPI.new(api_key, base_url)
+        @client = LLMs::APIs::OpenAICompatibleAPI.new(fetch_api_key, @base_url)
       end
 
       def calculate_usage(response, execution_time)

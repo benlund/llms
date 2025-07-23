@@ -1,0 +1,14 @@
+#!/usr/bin/env ruby
+
+#require 'llms'
+require_relative '../lib/llms'
+
+executor = LLMs::Executors.instance(
+  model_name: 'claude-sonnet-4-0',
+  temperature: 0.0,
+  max_completion_tokens: 1000
+)
+
+executor.execute_prompt("What is the airspeed velocitty of an unladen swallow?") do |chunk|
+  print chunk
+end

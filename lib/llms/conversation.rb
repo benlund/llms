@@ -1,4 +1,6 @@
 require_relative './conversation_message'
+require_relative './conversation_tool_call'
+require_relative './conversation_tool_result'
 
 module LLMs
   class Conversation
@@ -12,7 +14,7 @@ module LLMs
     end
 
     def pending?
-      @messages.last&.user?
+      !!@messages.last&.user?
     end
 
     def set_system_message(content)
@@ -34,8 +36,8 @@ module LLMs
         end
         add_conversation_message(content)
       else
-        unless tool_results.nil? || tool_results.all? { |tr| tr.is_a?(LLMs::ConversationMessage::ToolResult) }
-          raise "tool_results argument must be an array of ConversationMessage::ToolResult"
+        unless tool_results.nil? || tool_results.all? { |tr| tr.is_a?(LLMs::ConversationToolResult) }
+          raise "tool_results argument must be an array of ConversationToolResult"
         end
         add_conversation_message(LLMs::ConversationMessage.new("user", content, nil, tool_results))
       end
@@ -51,8 +53,8 @@ module LLMs
         end
         add_conversation_message(content)
       else
-        unless tool_calls.nil? || tool_calls.all? { |tc| tc.is_a?(LLMs::ConversationMessage::ToolCall) }
-          raise "tool_calls argument must be an array of ConversationMessage::ToolCall"
+        unless tool_calls.nil? || tool_calls.all? { |tc| tc.is_a?(LLMs::ConversationToolCall) }
+          raise "tool_calls argument must be an array of ConversationToolCall"
         end
         add_conversation_message(LLMs::ConversationMessage.new("assistant", content, tool_calls, nil))
       end
@@ -60,16 +62,15 @@ module LLMs
 
     def add_conversation_message(message)
       raise "message is not a ConversationMessage" unless message.is_a?(LLMs::ConversationMessage)
-      ##@@ TODO validate message.role is correct next role
       @messages << message
     end
 
     def system_message
-      @system_message.dup
+      @system_message&.dup
     end
 
     def available_tools
-      @available_tools.dup
+      @available_tools&.dup
     end
 
     def messages(include_system_message: false)

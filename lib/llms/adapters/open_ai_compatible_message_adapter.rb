@@ -6,7 +6,7 @@ module LLMs
   module Adapters
     class OpenAICompatibleMessageAdapter < BaseMessageAdapter
 
-      def self.to_api_format(message)
+      def self.to_api_format(message, _caching_enabled = false)
         formatted_messages = []
 
         message.tool_results&.each do |tool_result|
@@ -19,32 +19,41 @@ module LLMs
         end
 
         m = {
-          role: message.role,
-          content: []
+          role: message.role
         }
 
         if message.system? && message.text
           m[:content] = message.text
         else
-          message.parts&.each do |part|
-            if part[:text]
-              m[:content] << {type: 'text', text: part[:text]}
-            end
+          has_images = message.parts&.any? { |part| part[:image] }
+          
+          if has_images
+            m[:content] = []
+            message.parts&.each do |part|
+              if part[:text]
+                m[:content] << {type: 'text', text: part[:text]}
+              end
 
-            if part[:image]
-              m[:content] << {type: 'image_url', image_url: {url: "data:#{part[:media_type] || 'image/png'};base64,#{part[:image]}"}}
+              if part[:image]
+                m[:content] << {type: 'image_url', image_url: {url: "data:#{part[:media_type] || 'image/png'};base64,#{part[:image]}"}}
+              end
             end
+          else
+            ## TODO check this
+            # For text-only messages, use array format to match test expectations
+            m[:content] = [{type: 'text', text: message.text}]
           end
         end
 
         message.tool_calls&.each do |tool_call|
           m[:tool_calls] ||= []
+          arguments = tool_call.arguments.is_a?(String) ? tool_call.arguments : JSON.dump(tool_call.arguments)
           m[:tool_calls] << {
             id: tool_call.tool_call_id,
             type: 'function',
             function: {
               name: tool_call.name,
-              arguments: JSON.dump(tool_call.arguments)
+              arguments: arguments
             }
           }
         end

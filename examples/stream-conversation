@@ -1,0 +1,19 @@
+#!/usr/bin/env ruby
+
+#require 'llms'
+require_relative '../lib/llms'
+
+executor = LLMs::Executors.instance(
+  model_name: 'claude-sonnet-4-0',
+  temperature: 0.0,
+  max_completion_tokens: 1000
+)
+
+conversation = LLMs::Conversation.new
+while true
+  print "> "
+  conversation.add_user_message($stdin.gets)
+  response = executor.execute_conversation(conversation){|chunk| print chunk}
+  puts
+  conversation.add_assistant_message(response)
+end

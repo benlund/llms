@@ -1,4 +1,4 @@
-require_relative '../conversation_message'
+require_relative '../conversation_tool_call'
 
 module LLMs
   module Adapters
@@ -40,7 +40,7 @@ module LLMs
           end
         end
 
-        LLMs::ConversationMessage::ToolCall.new(
+        LLMs::ConversationToolCall.new(
           index,
           api_response_format_part['id'],
           api_response_format_part['type'],

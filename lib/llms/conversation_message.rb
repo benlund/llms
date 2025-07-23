@@ -1,3 +1,6 @@
+require_relative 'conversation_tool_call'
+require_relative 'conversation_tool_result'
+
 module LLMs
   class ConversationMessage
     USER_ROLE = 'user'
@@ -52,33 +55,6 @@ module LLMs
     ## Only for OpenAI compatible APIs
     def system?    
       @role == SYSTEM_ROLE
-    end
-
-    class ToolCall
-      attr_reader :index, :tool_call_id, :tool_call_type, :name, :arguments
-
-      def initialize(index, tool_call_id, tool_call_type, name, arguments)
-        raise "index is nil" if index.nil?
-        @index = index
-        @tool_call_id = tool_call_id
-        @tool_call_type = tool_call_type
-        @name = name
-        @arguments = arguments
-      end
-    end
-
-    class ToolResult
-      attr_reader :index, :tool_call_id, :tool_call_type, :name, :results, :is_error
-
-      def initialize(index, tool_call_id, tool_call_type, name, results, is_error)
-        raise "index is nil" if index.nil?
-        @index = index
-        @tool_call_id = tool_call_id
-        @tool_call_type = tool_call_type
-        @name = name
-        @results = results
-        @is_error = is_error
-      end
     end
   end
 end 

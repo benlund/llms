@@ -40,6 +40,7 @@ module LLMs
       private
 
       def test_single_model(executor)
+        ##@@ TOODO should print out full model name here and elsewhere !! argh TODO
         begin
           if @options[:stream]
             print "#{executor.model_name}: "

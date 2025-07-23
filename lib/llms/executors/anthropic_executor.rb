@@ -11,6 +11,7 @@ module LLMs
       def execute_conversation(conversation, &block)
         if block_given?
           stream_conversation(conversation) do |handler|
+            #@@ TODO handle thinking delta also
             handler.on(:text_delta) do |event|
               yield event.text
             end
@@ -43,7 +44,7 @@ module LLMs
         end
 
         @last_received_message_id = LLMs::Adapters::AnthropicMessageAdapter.find_message_id(api_response)
-        @last_received_message = LLMs::Adapters::AnthropicMessageAdapter.message_from_api_format(api_response)        
+        @last_received_message = LLMs::Adapters::AnthropicMessageAdapter.message_from_api_format(api_response)
         @last_usage_data = calculate_usage(api_response, execution_time)
 
         @last_received_message
@@ -53,9 +54,9 @@ module LLMs
         init_new_request(conversation)
 
         start_time = Time.now
-        begin
+        begin        
           http_response = client_request
-        rescue Faraday::BadRequestError => e
+        rescue Faraday::BadRequestError => e        
           @last_error = e.response[:body] ##@@TODO need error adapters too!!?!??
           return nil
         end
@@ -93,22 +94,29 @@ module LLMs
           messages: @formatted_messages,
           model: @model_name,
           temperature: @temperature,
-          max_tokens: @max_tokens
         }.tap do |params|
           if @system_prompt
             params[:system] = system_param
+          end
+          if @max_tokens
+            params[:max_tokens] = @max_tokens
+          end
+          ## Will override max_tokens if both are provided
+          if @max_completion_tokens
+            params[:max_tokens] = @max_completion_tokens
           end
           if @available_tools && @available_tools.any?
             params[:tools] = tool_schemas
           end
           if @thinking_mode
-            params[:thinking] = {
-              type: 'enabled',
-              budget_tokens: @thinking_max_tokens
-            }          
+            params[:thinking] = { type: 'enabled' }.tap do |thinking_params|
+              if @max_thinking_tokens
+                thinking_params[:budget_tokens] = @max_thinking_tokens
+              end
+            end
           end
         end
-      end        
+      end
 
       def client_request
         @client.messages(parameters: request_params)
@@ -127,10 +135,10 @@ module LLMs
       end
 
       def initialize_client
-        raise "Anthropic API key not set" if ENV['ANTHROPIC_API_KEY'].nil?
-        @client = Anthropic::Client.new(access_token: ENV['ANTHROPIC_API_KEY'])
+        @client = Anthropic::Client.new(access_token: fetch_api_key)
       end
 
+      ##@ TODO move to adapter
       def tool_schemas
         ts = @available_tools.map do |tool|
           {
@@ -157,6 +165,7 @@ module LLMs
         end
       end
 
+      ##@@ TODO move to own class
       def calculate_usage(api_response, execution_time)
         return unless api_response['usage']
         input_tokens = api_response['usage']['input_tokens']
