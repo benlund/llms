@@ -96,7 +96,7 @@ module LLMs
 
     ##@@ TODO add spec for this
     def self.add_model(provider_name, model_name, **details)
-      executor_class_name = info[:executor]
+      executor_class_name = details[:executor]
       provider = register_provider(
         provider_name, executor_class_name,
         **details.slice(:base_url, :api_key_env_var, :exclude_params)

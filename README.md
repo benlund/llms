@@ -1,6 +1,6 @@
 # LLMs
 
-A Ruby library for interacting with Large Language Model (LLM) providers including Anthropic, Google Gemini, X.ai, and other OpenAI-compatible API providers. Supports streaming, tool-use, image input, and cost-tracking.
+A Ruby library for interacting with Large Language Model (LLM) providers including Anthropic, Google Gemini, X.ai, and other OpenAI-compatible API providers (including local models). Supports streaming, tool-use, image input, and cost-tracking.
 
 
 ## Current Version
@@ -58,7 +58,16 @@ while true
   puts
   conversation.add_assistant_message(response)
 end
+
+# Add a custom model
+LLMs::Models.add_model('ollama', 'qwen3:8b',
+  executor: 'OpenAICompatibleExecutor', base_url: 'http://localhost:11434/api')
+
+executor = LLMs::Executors.instance(model_name: 'qwen3:8b', api_key: 'none')
+puts executor.execute_prompt("What is 2+2?")
 ```
+
+##@@ TODO add an example script with custom model to cehck above example works
 
 
 ## Configuration
@@ -96,13 +105,17 @@ executor = LLMs::Executors::AnthropicExecutor.new(
 llms-chat --model model-name
 ```
 
-or
+or if model-name would be ambiguous:
 
 ```bash
 llms-chat --model provider:model-name
 ```
 
-if model-name would be ambiguous.
+or to run against a local model (e.g. LMStudio):
+
+```bash
+llms-chat --oac-base-url "http://127.0.0.1:1234/v1" -m qwen/qwen3-32b --oac-api-key none
+```
 
 ### List Available Models
 

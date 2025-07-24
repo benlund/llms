@@ -7,7 +7,7 @@ module LLMs
       def initialize(model_name, provider, pricing: nil, supports_tools: nil, supports_vision: nil, supports_thinking: nil, enabled: nil)
         @model_name = model_name.to_s
         @provider = provider
-        @pricing = pricing&.transform_keys(&:to_sym) || {}
+        @pricing = pricing&.transform_keys(&:to_sym)
         @supports_tools = supports_tools
         @supports_vision = supports_vision
         @supports_thinking = supports_thinking
