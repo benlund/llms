@@ -4,7 +4,7 @@ RSpec.describe LLMs::Executors::OpenAICompatibleExecutor do
   let(:params) do
     {
       model_name: 'openai:gpt-3.5-turbo',
-      pricing: { input: 1.0, output: 2.0 },
+      pricing: { input: 1.0, output: 2.0, cached_input: 0.1 },
       api_key: 'fake',
       base_url: 'https://api.fake.com',
       temperature: 0.0,
@@ -41,6 +41,108 @@ RSpec.describe LLMs::Executors::OpenAICompatibleExecutor do
     end
   end
 
+  describe '#calculate_usage' do
+    let(:executor) { described_class.new(**params) }
+
+    it 'calculates usage from basic response' do
+      response = {
+        'usage' => {
+          'prompt_tokens' => 100,
+          'completion_tokens' => 50
+        }
+      }
+      
+      usage = executor.send(:calculate_usage, response, 1.5)
+      
+      expect(usage[:input_tokens]).to eq(100)
+      expect(usage[:output_tokens]).to eq(50)
+      expect(usage[:cache_was_written]).to be_nil
+      expect(usage[:cache_was_read]).to be false
+      expect(usage[:token_details]).to eq({ input: 100, output: 50 })
+      expect(usage[:execution_time]).to eq(1.5)
+      expect(usage[:estimated_cost]).to be_within(0.01).of(0.0002) # (100/1M)*1 + (50/1M)*2
+    end
+
+    it 'calculates usage with cached tokens' do
+      response = {
+        'usage' => {
+          'prompt_tokens' => 100,
+          'completion_tokens' => 50,
+          'prompt_tokens_details' => {
+            'cached_tokens' => 30
+          }
+        }
+      }
+      
+      usage = executor.send(:calculate_usage, response, 1.0)
+      
+      expect(usage[:input_tokens]).to eq(100)
+      expect(usage[:output_tokens]).to eq(50)
+      expect(usage[:cache_was_written]).to be_nil
+      expect(usage[:cache_was_read]).to be true
+      expect(usage[:token_details]).to eq({ 
+        input: 70, # 100 - 30 cached
+        output: 50,
+        cached_input: 30
+      })
+    end
+
+    it 'handles response without usage data' do
+      response = { 'choices' => [{ 'message' => { 'content' => 'Hello' } }] }
+      
+      usage = executor.send(:calculate_usage, response, 1.0)
+      
+      expect(usage[:input_tokens]).to be_nil
+      expect(usage[:output_tokens]).to be_nil
+      expect(usage[:cache_was_written]).to be_nil
+      expect(usage[:cache_was_read]).to be_nil
+      expect(usage[:token_details]).to eq({})
+      expect(usage[:execution_time]).to eq(1.0)
+      expect(usage[:estimated_cost]).to be_nil
+    end
+
+    it 'handles empty usage data' do
+      response = { 'usage' => {} }
+      
+      usage = executor.send(:calculate_usage, response, 0.5)
+      
+      expect(usage[:input_tokens]).to eq(0)
+      expect(usage[:output_tokens]).to eq(0)
+      expect(usage[:cache_was_written]).to be_nil
+      expect(usage[:cache_was_read]).to be false
+      expect(usage[:token_details]).to eq({})
+      expect(usage[:execution_time]).to eq(0.5)
+      expect(usage[:estimated_cost]).to be_nil # Empty token_counts returns nil
+    end
+
+    it 'handles missing token count fields' do
+      response = {
+        'usage' => {
+          'prompt_tokens' => 100
+          # missing completion_tokens
+        }
+      }
+      
+      usage = executor.send(:calculate_usage, response, 1.0)
+      
+      expect(usage[:input_tokens]).to eq(100)
+      expect(usage[:output_tokens]).to eq(0)
+      expect(usage[:token_details]).to eq({ input: 100 })
+    end
+
+    it 'handles nil response' do
+      usage = executor.send(:calculate_usage, nil, 1.0)
+      
+      expect(usage[:input_tokens]).to be_nil
+      expect(usage[:output_tokens]).to be_nil
+      expect(usage[:cache_was_written]).to be_nil
+      expect(usage[:cache_was_read]).to be_nil
+      expect(usage[:token_details]).to eq({})
+      expect(usage[:execution_time]).to eq(1.0)
+      expect(usage[:estimated_cost]).to be_nil
+    end
+  end
+
   describe '#send_conversation' do
     it 'returns a message and sets usage data' do
       exec = described_class.new(**params)
@@ -48,11 +150,23 @@ RSpec.describe LLMs::Executors::OpenAICompatibleExecutor do
       allow(exec).to receive(:client_request).and_return(api_response)
       allow(LLMs::Adapters::OpenAICompatibleMessageAdapter).to receive(:find_message_id).and_return('msgid')
       allow(LLMs::Adapters::OpenAICompatibleMessageAdapter).to receive(:message_from_api_format).and_return('assistant message')
-      allow(exec).to receive(:calculate_usage).and_return({ input_tokens: 10, output_tokens: 20 })
+      allow(exec).to receive(:calculate_usage).and_return({ 
+        input_tokens: 10, 
+        output_tokens: 20,
+        token_details: { input: 10, output: 20 },
+        execution_time: 1.0,
+        estimated_cost: 0.00004
+      })
 
       result = exec.send(:send_conversation, conversation)
       expect(result).to eq('assistant message')
-      expect(exec.last_usage_data).to eq({ input_tokens: 10, output_tokens: 20 })
+      expect(exec.last_usage_data).to include(
+        input_tokens: 10,
+        output_tokens: 20,
+        token_details: { input: 10, output: 20 },
+        execution_time: 1.0,
+        estimated_cost: 0.00004
+      )
       expect(exec.last_received_message_id).to eq('msgid')
       expect(exec.last_received_message).to eq('assistant message')
     end
@@ -75,6 +189,16 @@ RSpec.describe LLMs::Executors::OpenAICompatibleExecutor do
       result = exec.send(:send_conversation, conversation)
       expect(result).to be_nil
       expect(exec.last_error).to eq({ 'error' => 'api error' })
+    end
+
+    it 'handles API errors field in response' do
+      exec = described_class.new(**params)
+      allow(exec).to receive(:init_new_request)
+      allow(exec).to receive(:client_request).and_return({ 'errors' => 'api errors' })
+
+      result = exec.send(:send_conversation, conversation)
+      expect(result).to be_nil
+      expect(exec.last_error).to eq({ 'errors' => 'api errors' })
     end
   end
 end

@@ -4,7 +4,7 @@ RSpec.describe LLMs::Executors::BaseExecutor do
   let(:params) do
     {
       model_name: 'test-model',
-      pricing: { input: 3.0, output: 15.0, cache_read: 0.3, cache_write: 3.75 },
+      pricing: { input: 3.0, output: 15.0, cache_read: 0.3, cache_write_1hr: 3.75, cache_write_5min: 3.0 },
       temperature: 0.5,
       max_tokens: 1000
     }
@@ -47,42 +47,58 @@ RSpec.describe LLMs::Executors::BaseExecutor do
 
     it 'returns nil if no pricing' do
       exec = DummyExecutor.new(**params.merge(pricing: nil))
-      expect(exec.send(:calculate_cost, 100, 100)).to be_nil
+      expect(exec.send(:calculate_cost, { input: 100, output: 100 })).to be_nil
     end
 
-    it 'raises error if empty or incomplete pricing' do
+    it 'returns nil if token_counts is nil or empty' do
+      expect(exec.send(:calculate_cost, nil)).to be_nil
+      expect(exec.send(:calculate_cost, {})).to be_nil
+    end
+
+    it 'raises error if pricing is missing required keys' do
       exec = DummyExecutor.new(**params.merge(pricing: {}))
-      expect { exec.send(:calculate_cost, 100, 100) }.to raise_error(LLMs::CostCalculationError)
+      expect { exec.send(:calculate_cost, { input: 100, output: 100 }) }.to raise_error(LLMs::CostCalculationError, /Pricing missing key/)
+      
       exec = DummyExecutor.new(**params.merge(pricing: { input: 3.0 }))
-      expect { exec.send(:calculate_cost, 100, 100) }.to raise_error(LLMs::CostCalculationError)
-      exec = DummyExecutor.new(**params.merge(pricing: { output: 15.0 }))
-      expect { exec.send(:calculate_cost, 100, 100) }.to raise_error(LLMs::CostCalculationError)
+      expect { exec.send(:calculate_cost, { input: 100, output: 100 }) }.to raise_error(LLMs::CostCalculationError, /Pricing missing key/)
     end
 
     it 'calculates cost for input and output tokens' do
-      cost = exec.send(:calculate_cost, 1_000_000, 500_000)
+      token_counts = { input: 1_000_000, output: 500_000 }
+      cost = exec.send(:calculate_cost, token_counts)
       expect(cost).to be_within(0.01).of(3.0 + 7.5)
     end
 
     it 'calculates cost for cache tokens' do
-      cost = exec.send(:calculate_cost, 0, 0, 1_000_000, 1_000_000)
+      token_counts = { cache_read: 1_000_000, cache_write_1hr: 1_000_000 }
+      cost = exec.send(:calculate_cost, token_counts)
       expect(cost).to be_within(0.01).of(3.75 + 0.3)
     end
 
-    it 'raises error if cache_write pricing missing' do
-      limited_pricing = { input: 3.0, output: 15.0 }
-      exec = DummyExecutor.new(**params.merge(pricing: limited_pricing))
-      expect {
-        exec.send(:calculate_cost, 0, 0, 1_000_000, 0)
-      }.to raise_error(LLMs::CostCalculationError, /Cache write pricing/)
+    it 'calculates cost for 5min cache write tokens' do
+      token_counts = { cache_write_5min: 1_000_000 }
+      cost = exec.send(:calculate_cost, token_counts)
+      expect(cost).to be_within(0.01).of(3.0)
     end
 
-    it 'raises error if cache_read pricing missing' do
-      limited_pricing = { input: 3.0, output: 15.0 }
-      exec = DummyExecutor.new(**params.merge(pricing: limited_pricing))
-      expect {
-        exec.send(:calculate_cost, 0, 0, 0, 1_000_000)
-      }.to raise_error(LLMs::CostCalculationError, /Cache read pricing/)
+    it 'ignores zero token counts' do
+      token_counts = { input: 1_000_000, output: 0, cache_read: 0 }
+      cost = exec.send(:calculate_cost, token_counts)
+      expect(cost).to be_within(0.01).of(3.0)
+    end
+
+    it 'handles string keys in token_counts' do
+      token_counts = { input: 1_000_000, output: 500_000 }
+      cost = exec.send(:calculate_cost, token_counts)
+      expect(cost).to be_within(0.01).of(3.0 + 7.5)
+    end
+
+    it 'handles string keys in pricing' do
+      pricing = { input: 3.0, output: 15.0 }
+      exec = DummyExecutor.new(**params.merge(pricing: pricing))
+      token_counts = { input: 1_000_000, output: 500_000 }
+      cost = exec.send(:calculate_cost, token_counts)
+      expect(cost).to be_within(0.01).of(3.0 + 7.5)
     end
   end
 end

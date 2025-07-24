@@ -117,62 +117,28 @@ module LLMs
         tokens
       end
 
-      ## @@ TODO check usage data format for all providers and unify
-      ## @@ TODO move into a Usage / Cost calc class
-      def calculate_cost(input_tokens, output_tokens, cache_write_tokens = 0, cache_read_tokens = 0)
+      def calculate_cost(token_counts)
         return nil unless @pricing
+        return nil if token_counts.nil? || token_counts.empty?
 
-        unless @pricing.is_a?(Hash) && @pricing.key?(:input) && @pricing.key?(:output)
-          raise LLMs::CostCalculationError, "Pricing must be a hash with :input and :output keys, got: #{@pricing}"
+        token_keys = token_counts.keys.map(&:to_s)
+        pricing_keys = @pricing.keys.map(&:to_s)
+
+        missing_keys = token_keys - pricing_keys
+        unless missing_keys.empty?
+          raise LLMs::CostCalculationError, "Pricing missing key: #{missing_keys.join(', ')}"
         end
 
-        cost_components = []
-
-        ##@@ TODO simplify below
-
-        if input_tokens > 0 && @pricing[:input]
-          cost_components << {
-            name: "input",
-            tokens: input_tokens,
-            rate: @pricing[:input],
-            cost: (input_tokens.to_f / 1_000_000.0) * @pricing[:input]
-          }
-        end
-
-        if output_tokens > 0 && @pricing[:output]
-          cost_components << {
-            name: "output",
-            tokens: output_tokens,
-            rate: @pricing[:output],
-            cost: (output_tokens.to_f / 1_000_000.0) * @pricing[:output]
-          }
-        end
-
-        if cache_write_tokens > 0
-          unless @pricing[:cache_write]
-            raise LLMs::CostCalculationError, "Cache write pricing not set for model #{@model_name}"
+        token_keys.reduce(0.0) do |sum, k|
+          key = k.to_sym
+          if token_counts[key] && token_counts[key] > 0 && @pricing[key]
+            ##@@ TODO remove below after checking specs
+            puts "adding #{key} #{token_counts[key]} #{@pricing[key]}"
+            sum + (token_counts[key].to_f / 1_000_000.0) * @pricing[key]
+          else
+            sum
           end
-          cost_components << {
-            name: "cache_write",
-            tokens: cache_write_tokens,
-            rate: @pricing[:cache_write],
-            cost: (cache_write_tokens.to_f / 1_000_000.0) * @pricing[:cache_write]
-          }
         end
-
-        if cache_read_tokens > 0
-          unless @pricing[:cache_read]
-            raise LLMs::CostCalculationError, "Cache read pricing not set for model #{@model_name}"
-          end
-          cost_components << {
-            name: "cache_read",
-            tokens: cache_read_tokens,
-            rate: @pricing[:cache_read],
-            cost: (cache_read_tokens.to_f / 1_000_000.0) * @pricing[:cache_read]
-          }
-        end
-
-        cost_components.sum { |c| c[:cost] }
       end
 
     end

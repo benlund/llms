@@ -147,15 +147,46 @@ module LLMs
       end
 
       def calculate_usage(response, execution_time)
-        return nil if response.nil? || response['usage'].nil?
+        input_tokens = nil
+        output_tokens = nil
+        cache_was_written = nil
+        cache_was_read = nil
+        token_counts = {}
 
-        input_tokens = response['usage']['prompt_tokens']
-        output_tokens = response['usage']['completion_tokens']
+        if !response.nil? && usage = response['usage']          
+          input_tokens = 0
+          output_tokens = 0
+          cache_was_read = false
+
+          if pt = usage['prompt_tokens']
+            input_tokens += pt
+            token_counts[:input] = pt
+          end
+
+          if ptd = usage['prompt_tokens_details']
+            if ct = ptd['cached_tokens']
+              if ct > 0
+                cache_was_read = true
+              end
+              token_counts[:cached_input] = ct
+              token_counts[:input] -= ct ##@@ TODO is this correct?
+            end
+          end
+          
+          if ct = usage['completion_tokens']
+            output_tokens += ct
+            token_counts[:output] = ct
+          end
+        end
+
         {
           input_tokens: input_tokens,
           output_tokens: output_tokens,
+          cache_was_written: cache_was_written,
+          cache_was_read: cache_was_read,
+          token_details: token_counts,
           execution_time: execution_time,
-          estimated_cost: calculate_cost(input_tokens, output_tokens)
+          estimated_cost: calculate_cost(token_counts)
         }
       end
 

@@ -212,6 +212,7 @@
                 "latest": true,
                 "pricing": {
                     "input": 3.00,
+                    "cached_input": 0.75,
                     "output": 15.00
                 },
                 "context_window": 256000,
@@ -220,6 +221,7 @@
             "grok-3": {
                 "pricing": {
                     "input": 3.00,
+                    "cached_input": 0.75,
                     "output": 15.00
                 },
                 "context_window": 131072,
@@ -229,6 +231,7 @@
                 "latest": true,
                 "pricing": {
                     "input": 0.30,
+                    "cached_input": 0.075,
                     "output": 0.50
                 },
                 "context_window": 131072,
@@ -237,6 +240,7 @@
             "grok-3-fast": {
                 "pricing": {
                     "input": 5.00,
+                    "cached_input": 1.25,
                     "output": 25.00
                 },
                 "context_window": 131072,
@@ -246,6 +250,7 @@
                 "latest": true,
                 "pricing": {
                     "input": 0.60,
+                    "cached_input": 0.15,
                     "output": 4.00
                 },
                 "context_window": 131072,
@@ -254,6 +259,7 @@
             "grok-2-1212": {
                 "pricing": {
                     "input": 2.00,
+                    "cached_input": 2.00,
                     "output": 10.00
                 },
                 "context_window": 131072,
@@ -262,6 +268,7 @@
             "grok-2-vision-1212": {
                 "pricing": {
                     "input": 2.00,
+                    "cached_input": 2.00,
                     "output": 10.00
                 },
                 "context_window": 32768,

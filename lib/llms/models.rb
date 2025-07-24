@@ -85,13 +85,26 @@ module LLMs
       raise "Unknown provider: #{provider_name}" unless provider
 
       provider.enabled = false
-    end 
+    end
 
     def self.enable_provider(provider_name)
       provider = PROVIDER_REGISTRY[provider_name.to_s]
       raise "Unknown provider: #{provider_name}" unless provider
 
       provider.enabled = true
+    end
+
+    ##@@ TODO add spec for this
+    def self.add_model(provider_name, model_name, **details)
+      executor_class_name = info[:executor]
+      provider = register_provider(
+        provider_name, executor_class_name,
+        **details.slice(:base_url, :api_key_env_var, :exclude_params)
+      )
+      register_model(
+        provider.provider_name, model_name,
+        **details.slice(:pricing, :tools, :vision, :thinking, :enabled, :aliases)
+      )
     end
 
     def self.load_models_file(file_path)
@@ -149,7 +162,7 @@ module LLMs
         provider_ok_for_tools = !require_tools || provider.possibly_supports_tools?
         provider_ok_for_vision = !require_vision || provider.possibly_supports_vision?
         provider_ok_for_thinking = !require_thinking || provider.possibly_supports_thinking?
-        
+
         if provider_ok_for_enabled && provider_ok_for_tools && provider_ok_for_vision && provider_ok_for_thinking
           PROVIDER_TO_MODEL_REGISTRY[provider.provider_name].each do |_, model|
             model_ok_for_enabled = include_disabled || model.is_enabled?

@@ -167,18 +167,70 @@ module LLMs
 
       ##@@ TODO move to own class
       def calculate_usage(api_response, execution_time)
-        return unless api_response['usage']
-        input_tokens = api_response['usage']['input_tokens']
-        output_tokens = api_response['usage']['output_tokens']
-        cache_write_tokens = api_response['usage']['cache_creation_input_tokens']
-        cache_read_tokens = api_response['usage']['cache_read_input_tokens']
+        input_tokens = nil
+        output_tokens = nil
+        token_counts = {}
+        cache_was_written = nil
+        cache_was_read = nil
+
+        if usage = api_response['usage']
+          input_tokens = 0
+          output_tokens = 0
+          cache_was_written = false
+          cache_was_read = false
+
+          if it = usage['input_tokens']
+            input_tokens += it
+            token_counts[:input] = it
+          end
+          
+          if ccit = usage['cache_creation_input_tokens']
+            input_tokens += ccit
+            if ccit > 0
+              cache_was_written = true
+            end
+          end
+          
+          if crit = usage['cache_read_input_tokens']
+            input_tokens += crit
+            token_counts[:cache_read] = crit
+            if crit > 0
+              cache_was_read = true
+            end
+          end
+          
+          if cache_details = usage['cache_creation']
+            if it1h = cache_details['ephemeral_1h_input_tokens']
+              token_counts[:cache_write_1hr] = it1h
+              if it1h > 0
+                cache_was_written = true
+              end
+            end
+            if it5min = cache_details['ephemeral_5min_input_tokens']
+              token_counts[:cache_write_5min] = it5min
+              if it5min > 0
+                cache_was_written = true
+              end
+            end
+          elsif ccit = usage['cache_creation_input_tokens']
+            # if no details, assume all caching is 1hr TODO fix this
+            token_counts[:cache_write_1hr] = ccit
+          end
+          
+          if ot = usage['output_tokens']
+            output_tokens += ot
+            token_counts[:output] = ot
+          end
+        end
+
         {
           input_tokens: input_tokens,
           output_tokens: output_tokens,
-          cache_write_tokens: cache_write_tokens,
-          cache_read_tokens: cache_read_tokens,
+          cache_was_written: cache_was_written,
+          cache_was_read: cache_was_read,
+          token_details: token_counts,
           execution_time: execution_time,
-          estimated_cost: calculate_cost(input_tokens, output_tokens, cache_write_tokens, cache_read_tokens)
+          estimated_cost: calculate_cost(token_counts)
         }
       end
     end

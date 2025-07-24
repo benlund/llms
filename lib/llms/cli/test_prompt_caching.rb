@@ -8,12 +8,19 @@ module LLMs
       def default_options
         super.merge({
           max_completion_tokens: 10,
-          confirmed: false
+          confirmed: false,
+          system_prompt: "You are a book expert. What is the following excerpt from?",
+          cache_prompt: true ##@@ TODO caching is automative for most models now - remove this option
         })
       end
 
       def add_custom_options(opts)
         opts.on('-y', '--yes', 'Skip confirmation warning') { @options[:confirmed] = true }
+      end
+
+      def setup
+        # No model name required for this command - TODO make configurable
+        true
       end
 
       def perform_execution
@@ -23,28 +30,27 @@ module LLMs
           exit 1
         end
 
+        if @options[:model_name]
+          test_single_model(create_executor({quiet: true}))
+        else
+          test_all_models
+        end
+      end
+
+      def test_all_models
         models = LLMs::Models.list_model_names(full: true)
         if ARGV[0]
           models = models.select { |name| name.include?(ARGV[0]) }
         end
         models.each do |model_name|
-          test_model_caching(model_name)
+          test_single_model(create_executor({model_name: model_name, quiet: true}))
           puts "-" * 80
         end
       end
 
-      private
-
-      def test_model_caching(model_name)
+      def test_single_model(executor)
         begin
-          executor = LLMs::Executors.instance(
-            model_name: model_name,
-            max_completion_tokens: @options[:max_completion_tokens],
-            system_prompt: "You are a book expert. What is the following excerpt from?",
-            cache_prompt: true
-          )
-
-          puts "\nTesting #{model_name}:"
+          puts "\nTesting #{executor.model_name}:"
           puts "First call:"
           response = executor.execute_prompt(prompt_data)
           puts "Response: #{response}"
@@ -56,26 +62,26 @@ module LLMs
           usage = executor.last_usage_data
           puts "Usage: #{usage.inspect}"
 
-          if usage.fetch(:cache_read_tokens, 0) > 0
+          if usage.fetch(:cache_was_read, false)
             puts "\e[32mSUCCESS: Prompt caching detected!\e[0m"
           else
             puts "\e[31mFAILURE: Prompt caching not detected!\e[0m"
           end
 
         rescue => e
-          puts "#{model_name}: ERROR - #{e.message}"
+          puts "#{executor.model_name}: ERROR - #{e.message}"
           puts e.backtrace if @options[:debug]
         end
       end
 
       def prompt_data
-        DATA.read
+        PROMPT_DATA
       end
     end
   end
 end
 
-__END__
+PROMPT_DATA = <<-PROMPT
 "That is very evident."
 "Absurdly commonplace, is it not?"
 "But the boots and the bath?"
@@ -122,4 +128,5 @@ The fellow gave a bellow of anger and sprang upon me like a tiger. I have held m
 "Well, Watson," said he, "a very pretty hash you have made of it! I rather think you had better come back with me to London by the night express."
 An hour afterwards, Sherlock Holmes, in his usual garb and style, was seated in my private room at the hotel. His explanation of his sudden and opportune appearance was simplicity itself, for, finding that he could get away from London, he determined to head me off at the next obvious point of my travels. In the disguise of a workingman he had sat in the cabaret waiting for my appearance.
 "And a singularly consistent investigation you have made, my dear Watson," said he. "I cannot at the moment recall any possible blunder which you have omitted. The total effect of your proceeding has been to give the alarm everywhere and yet to discover nothing."
-"Perhaps you would have done no better," I answered bitterly. 
+"Perhaps you would have done no better," I answered bitterly.
+PROMPT

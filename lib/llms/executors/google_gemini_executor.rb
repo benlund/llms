@@ -151,27 +151,52 @@ module LLMs
         ]
       end
 
-      def calculate_usage(response, execution_time)        
-        input_tokens = 0
-        output_tokens = 0
+      def calculate_usage(response, execution_time)
+        input_tokens = nil
+        output_tokens = nil
+        cache_was_written = nil
+        cache_was_read = nil
+        token_counts = {}    
+
+        #                    "input": 1.25,
+        #                    "output": 10.00,
+        #                    "cache_write_1mt/hr": 4.50,
+        #                    "cache_read": 0.31
+
 
         ## TODO support cache read/write tokens
 
         if usage_metadata = response['usageMetadata']
-          input_tokens = usage_metadata['promptTokenCount']
-          if usage_metadata['thoughtsTokenCount']
-            output_tokens = usage_metadata['thoughtsTokenCount']
+          input_tokens = 0
+          output_tokens = 0
+          cache_was_written = false
+          cache_was_read = false
+
+          if ptc = usage_metadata['promptTokenCount']
+            input_tokens += ptc
+            token_counts[:input] = ptc
           end
-          if usage_metadata['candidatesTokenCount']
-            output_tokens = usage_metadata['candidatesTokenCount']
+          
+          if otc = usage_metadata['thoughtsTokenCount']
+            output_tokens += otc
+            token_counts[:output] = otc
+          end
+          
+          if ctc = usage_metadata['candidatesTokenCount']
+            output_tokens += ctc
+            token_counts[:output] ||= 0
+            token_counts[:output] += ctc
           end
         end
 
         {
           input_tokens: input_tokens,
           output_tokens: output_tokens,
+          cache_was_written: cache_was_written,
+          cache_was_read: cache_was_read,
+          token_details: token_counts,
           execution_time: execution_time,
-          estimated_cost: calculate_cost(input_tokens, output_tokens)
+          estimated_cost: calculate_cost(token_counts)
         }
       end
 
