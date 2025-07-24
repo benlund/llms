@@ -67,8 +67,6 @@ executor = LLMs::Executors.instance(model_name: 'qwen3:8b', api_key: 'none')
 puts executor.execute_prompt("What is 2+2?")
 ```
 
-##@@ TODO add an example script with custom model to cehck above example works
-
 
 ## Configuration
 
@@ -121,6 +119,15 @@ llms-chat --oac-base-url "http://127.0.0.1:1234/v1" -m qwen/qwen3-32b --oac-api-
 
 ```bash
 llms-chat --list-models
+```
+
+### Test various features against all models
+
+```bash
+llms-test-model-access # send a cshort question with a custom system prompt to all models in turn
+llms-test-model-tool-usage # configures a simple tool and asks all models in turn to call it
+llms-test-model-image-support # sends an image to every model asking it to describe the image
+llms-test-prompt-caching # send a long prompt and see if it is cached
 ```
 
 ## Development
