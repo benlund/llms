@@ -46,7 +46,7 @@ RSpec.describe LLMs::Models::Model do
 
     it 'handles nil values for optional parameters' do
       model = described_class.new('test-model', provider)
-      expect(model.pricing).to eq({})
+      expect(model.pricing).to be_nil
       expect(model.supports_tools).to be_nil
       expect(model.supports_vision).to be_nil
       expect(model.supports_thinking).to be_nil
@@ -184,7 +184,7 @@ RSpec.describe LLMs::Models::Model do
 
     it 'calculates cost including cache tokens' do
       cost = model.calculate_cost(1000, 500, 200, 100)
-      expected_cost = (1000 / 1_000_000.0) * 0.03 + (500 / 1_000_000.0) * 0.06 + 
+      expected_cost = (1000 / 1_000_000.0) * 0.03 + (500 / 1_000_000.0) * 0.06 +
                      (200 / 1_000_000.0) * 0.01 + (100 / 1_000_000.0) * 0.02
       expect(cost).to eq(expected_cost)
     end
@@ -205,4 +205,4 @@ RSpec.describe LLMs::Models::Model do
       expect(cost).to eq(0.0)
     end
   end
-end 
+end
