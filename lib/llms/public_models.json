@@ -259,7 +259,6 @@
             "grok-2-1212": {
                 "pricing": {
                     "input": 2.00,
-                    "cached_input": 2.00,
                     "output": 10.00
                 },
                 "context_window": 131072,
@@ -268,7 +267,6 @@
             "grok-2-vision-1212": {
                 "pricing": {
                     "input": 2.00,
-                    "cached_input": 2.00,
                     "output": 10.00
                 },
                 "context_window": 32768,

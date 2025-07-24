@@ -132,4 +132,121 @@ RSpec.describe LLMs::Models do
       expect { described_class.register_model('unknown_provider', 'test_model') }.to raise_error("Unknown provider: unknown_provider")
     end
   end
+
+  describe '.add_model' do
+    after do
+      # Clean up any test providers and models
+      described_class::PROVIDER_REGISTRY.delete('test_add_provider')
+      described_class::PROVIDER_TO_MODEL_REGISTRY.delete('test_add_provider')
+    end
+
+    it 'registers both provider and model with basic parameters' do
+      model = described_class.add_model(
+        'test_add_provider',
+        'test_add_model',
+        executor: 'TestExecutor',
+        enabled: true
+      )
+
+      expect(model).to be_a(LLMs::Models::Model)
+      expect(model.model_name).to eq('test_add_model')
+      expect(model.provider.provider_name).to eq('test_add_provider')
+      expect(model.provider.executor_class_name).to eq('TestExecutor')
+      expect(model.provider.is_enabled?).to be true
+    end
+
+    it 'registers provider with all provider-specific parameters' do
+      model = described_class.add_model(
+        'test_add_provider',
+        'test_add_model',
+        executor: 'TestExecutor',
+        base_url: 'https://api.test.com',
+        api_key_env_var: 'TEST_API_KEY',
+        exclude_params: ['param1', 'param2'],
+        enabled: true
+      )
+
+      provider = model.provider
+      expect(provider.base_url).to eq('https://api.test.com')
+      expect(provider.api_key_env_var).to eq('TEST_API_KEY')
+      expect(provider.exclude_params).to eq(['param1', 'param2'])
+    end
+
+    it 'registers model with all model-specific parameters' do
+      model = described_class.add_model(
+        'test_add_provider',
+        'test_add_model',
+        executor: 'TestExecutor',
+        pricing: { 'input' => 0.001, 'output' => 0.002 },
+        tools: true,
+        vision: true,
+        thinking: true,
+        enabled: true,
+        aliases: ['alias1', 'alias2']
+      )
+
+      expect(model.pricing).to eq({ input: 0.001, output: 0.002 })
+      expect(model.supports_tools).to be true
+      expect(model.supports_vision).to be true
+      expect(model.supports_thinking).to be true
+      expect(model.enabled).to be true
+    end
+
+    it 'handles mixed provider and model parameters correctly' do
+      model = described_class.add_model(
+        'test_add_provider',
+        'test_add_model',
+        executor: 'TestExecutor',
+        base_url: 'https://api.test.com',
+        api_key_env_var: 'TEST_API_KEY',
+        pricing: { 'input' => 0.001 },
+        tools: true,
+        vision: false,
+        enabled: true
+      )
+
+      # Verify provider parameters
+      provider = model.provider
+      expect(provider.base_url).to eq('https://api.test.com')
+      expect(provider.api_key_env_var).to eq('TEST_API_KEY')
+      expect(provider.executor_class_name).to eq('TestExecutor')
+
+      # Verify model parameters
+      expect(model.pricing).to eq({ input: 0.001 })
+      expect(model.supports_tools).to be true
+      expect(model.supports_vision).to be false
+      expect(model.enabled).to be true
+    end
+
+    it 'handles missing executor parameter gracefully' do
+      model = described_class.add_model('test_add_provider', 'test_add_model')
+      
+      expect(model).to be_a(LLMs::Models::Model)
+      expect(model.provider.executor_class_name).to eq('')
+    end
+
+    it 'can find the registered model after registration' do
+      model = described_class.add_model(
+        'test_add_provider',
+        'test_add_model',
+        executor: 'TestExecutor',
+        enabled: true
+      )
+
+      found_model = described_class.find_model('test_add_model')
+      expect(found_model).to eq(model)
+    end
+
+    it 'can find the registered model with provider prefix' do
+      model = described_class.add_model(
+        'test_add_provider',
+        'test_add_model',
+        executor: 'TestExecutor',
+        enabled: true
+      )
+
+      found_model = described_class.find_model('test_add_provider:test_add_model')
+      expect(found_model).to eq(model)
+    end
+  end
 end 

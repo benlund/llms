@@ -86,7 +86,10 @@ module LLMs
         @system_prompt = conversation.system_message
         @available_tools = conversation.available_tools ##@@ TODO map through an adapter here
         ## TODO add acache control to last tool definition
-        @formatted_messages = conversation.formatted_messages(LLMs::Adapters::AnthropicMessageAdapter, caching_enabled?)
+        @formatted_messages = conversation.messages.map.with_index do |message, index|
+          is_last_message = index == conversation.messages.size - 1
+          LLMs::Adapters::AnthropicMessageAdapter.to_api_format(message, caching_enabled? && is_last_message)
+        end
       end
 
       def request_params

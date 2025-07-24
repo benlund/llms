@@ -1,41 +1,6 @@
 require 'spec_helper'
 
 RSpec.describe LLMs::Adapters::AnthropicMessageAdapter do
-  describe '.messages_to_api_format' do
-    let(:messages) do
-      [
-        LLMs::ConversationMessage.new('user', 'Hello'),
-        LLMs::ConversationMessage.new('assistant', 'Hi there!'),
-        LLMs::ConversationMessage.new('user', 'How are you?')
-      ]
-    end
-
-    it 'converts messages to Anthropic format' do
-      result = described_class.messages_to_api_format(messages)
-      expect(result).to be_an(Array)
-      expect(result.length).to eq(3)
-      
-      expect(result[0]).to include(
-        role: 'user',
-        content: [{ type: 'text', text: 'Hello' }]
-      )
-      
-      expect(result[1]).to include(
-        role: 'assistant',
-        content: [{ type: 'text', text: 'Hi there!' }]
-      )
-      
-      expect(result[2]).to include(
-        role: 'user',
-        content: [{ type: 'text', text: 'How are you?' }]
-      )
-    end
-
-    it 'handles empty messages array' do
-      result = described_class.messages_to_api_format([])
-      expect(result).to eq([])
-    end
-  end
 
   describe '.to_api_format' do
     let(:message) { LLMs::ConversationMessage.new('user', 'Hello') }

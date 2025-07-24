@@ -125,7 +125,8 @@ module LLMs
         pricing_keys = @pricing.keys.map(&:to_s)
 
         missing_keys = token_keys - pricing_keys
-        unless missing_keys.empty?
+        ## TODO remove this special case. Is it safe to skip all missing keys if the token count is zero for them?
+        unless missing_keys.empty? || (missing_keys.include?('cached_input') && token_counts[:cached_input] == 0)
           raise LLMs::CostCalculationError, "Pricing missing key: #{missing_keys.join(', ')}"
         end
 

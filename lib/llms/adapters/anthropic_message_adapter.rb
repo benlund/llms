@@ -6,12 +6,6 @@ module LLMs
   module Adapters
     class AnthropicMessageAdapter < BaseMessageAdapter
 
-      def self.messages_to_api_format(messages, caching_enabled = false)
-        messages_count = messages.size
-        messages.map.with_index do |message, index|
-          to_api_format(message, caching_enabled && index == messages_count - 1)
-        end
-      end
 
       def self.to_api_format(message, caching_enabled = false)
         content = []

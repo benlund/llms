@@ -62,7 +62,7 @@ module LLMs
           usage = executor.last_usage_data
           puts "Usage: #{usage.inspect}"
 
-          if usage.fetch(:cache_was_read, false)
+          if usage&.fetch(:cache_was_read, false)
             puts "\e[32mSUCCESS: Prompt caching detected!\e[0m"
           else
             puts "\e[31mFAILURE: Prompt caching not detected!\e[0m"

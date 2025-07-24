@@ -11,7 +11,7 @@ RSpec.describe LLMs::Executors::AnthropicExecutor do
     }
   end
 
-  let(:conversation) { instance_double('LLMs::Conversation', last_message: 'user message', system_message: 'system', available_tools: [], formatted_messages: []) }
+  let(:conversation) { instance_double('LLMs::Conversation', last_message: 'user message', system_message: 'system', available_tools: [], messages: []) }
   let(:api_response) { { 'usage' => { 'input_tokens' => 10, 'output_tokens' => 20 } } }
 
   before do

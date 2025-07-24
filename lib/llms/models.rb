@@ -94,7 +94,6 @@ module LLMs
       provider.enabled = true
     end
 
-    ##@@ TODO add spec for this
     def self.add_model(provider_name, model_name, **details)
       executor_class_name = details[:executor]
       provider = register_provider(

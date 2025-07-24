@@ -81,10 +81,7 @@ module LLMs
       m
     end
 
-    ## TODO deprecate this
-    def formatted_messages(adapter, caching_enabled = false)
-      adapter.messages_to_api_format(@messages, caching_enabled)
-    end
+
 
     def last_message
       @messages.last&.dup
