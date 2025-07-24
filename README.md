@@ -1,6 +1,8 @@
 # LLMs
 
-A Ruby library for interacting with Large Language Model (LLM) providers including Anthropic, Google Gemini, X.ai, and other OpenAI-compatible API providers (including local models). Supports streaming, tool-use, image input, and cost-tracking.
+A Ruby library for interacting with Large Language Model (LLM) providers including Anthropic, Google Gemini, X.ai, and other OpenAI-compatible API providers (including local models).
+
+Supports streaming, event-handling, conversation management, tool-use, image input, and cost-tracking.
 
 
 ## Current Version
@@ -65,7 +67,20 @@ LLMs::Models.add_model('ollama', 'qwen3:8b',
 
 executor = LLMs::Executors.instance(model_name: 'qwen3:8b', api_key: 'none')
 puts executor.execute_prompt("What is 2+2?")
+
+# Handle Streaming Events
+
+executor.stream_conversation(conversation) do |emitter|
+  emitter.on :tool_call_completed do |event|
+    puts event.name
+    puts event.arguments.inspect
+  end
+end
 ```
+
+## Advanced Use
+
+@@TODO show event handling
 
 
 ## Configuration

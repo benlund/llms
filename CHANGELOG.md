@@ -18,8 +18,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Fireworks
   - Deepinfra (disablesd by default)
   - Novita (disabled by default)
-  - HuggingFace (executor implemetation only))
+  - HuggingFace (executor implemetation only)
 - Streaming response support
+- Event-handling
 - Tool usage and function calling
 - Image processing capabilities
 - Cost tracking and usage reporting
