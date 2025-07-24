@@ -132,8 +132,6 @@ module LLMs
         token_keys.reduce(0.0) do |sum, k|
           key = k.to_sym
           if token_counts[key] && token_counts[key] > 0 && @pricing[key]
-            ##@@ TODO remove below after checking specs
-            puts "adding #{key} #{token_counts[key]} #{@pricing[key]}"
             sum + (token_counts[key].to_f / 1_000_000.0) * @pricing[key]
           else
             sum
