@@ -78,11 +78,6 @@ executor.stream_conversation(conversation) do |emitter|
 end
 ```
 
-## Advanced Use
-
-@@TODO show event handling
-
-
 ## Configuration
 
 Set your API keys as environment variables:
