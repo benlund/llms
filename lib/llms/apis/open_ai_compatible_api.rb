@@ -44,7 +44,7 @@ module LLMs
           if response.code.to_s == '200'
             JSON.parse(response.body)
           else
-            {'error' => JSON.parse(response.body)} ##@@ TODO better detail here
+            {'error' => JSON.parse(response.body)} ## TODO add status code?
           end
         end
       end

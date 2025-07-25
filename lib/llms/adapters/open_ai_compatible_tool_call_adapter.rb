@@ -16,7 +16,7 @@ module LLMs
         end
 
         if arguments_value.nil?
-          {} ##@@ TODO Check this is correct
+          {}
 
         elsif arguments_value.is_a?(String)
           arguments = JSON.parse(arguments_value)

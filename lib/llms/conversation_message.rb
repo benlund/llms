@@ -17,7 +17,7 @@ module LLMs
       elsif content.is_a?(Array)
         content
       else
-        raise "content (#{content}) is not a String or Array" ##@@ TODO validate structure of parts
+        raise "content (#{content}) is not a String or Array"
       end
       @tool_calls = tool_calls
       @tool_results = tool_results

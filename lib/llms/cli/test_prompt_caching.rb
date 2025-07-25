@@ -10,7 +10,7 @@ module LLMs
           max_completion_tokens: 10,
           confirmed: false,
           system_prompt: "You are a book expert. What is the following excerpt from?",
-          cache_prompt: true ##@@ TODO caching is automative for most models now - remove this option
+          cache_prompt: true ##TODO caching is automatic for most models now - remove this option
         })
       end
 
@@ -19,7 +19,7 @@ module LLMs
       end
 
       def setup
-        # No model name required for this command - TODO make configurable
+        # No model name required for this command
         true
       end
 
@@ -31,7 +31,7 @@ module LLMs
         end
 
         if @options[:model_name]
-          test_single_model(create_executor({quiet: true}))
+          test_single_model(create_executor)
         else
           test_all_models
         end
@@ -43,17 +43,16 @@ module LLMs
           models = models.select { |name| name.include?(ARGV[0]) }
         end
         models.each do |model_name|
-          test_single_model(create_executor({model_name: model_name, quiet: true}))
+          test_single_model(create_executor({model_name: model_name}))
           puts "-" * 80
         end
       end
 
       def test_single_model(executor)
         begin
-          puts "\nTesting #{executor.model_name}:"
           puts "First call:"
           response = executor.execute_prompt(prompt_data)
-          puts "Response: #{response}"
+          puts response
           puts "Usage: #{executor.last_usage_data.inspect}"
 
           puts "\nSecond call:"
@@ -68,7 +67,7 @@ module LLMs
             puts "\e[31mFAILURE: Prompt caching not detected!\e[0m"
           end
 
-        rescue => e
+        rescue StandardError => e
           puts "#{executor.model_name}: ERROR - #{e.message}"
           puts e.backtrace if @options[:debug]
         end

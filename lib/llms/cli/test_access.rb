@@ -8,30 +8,25 @@ module LLMs
       def default_options
         super.merge({
           max_completion_tokens: 250,
-          latest: false,
           prompt: "2+2=",
           system_prompt: "Always reply with numbers as WORDS not digits."
         })
       end
 
       def add_custom_options(opts)
-        opts.on("--latest", "Only test latest releases in each class from each provider") do
-          @options[:latest] = true
-        end
-
         opts.on("--prompt PROMPT", "Test prompt to use") do |prompt|
           @options[:prompt] = prompt
         end
       end
 
       def setup
-        # No model name required for this command - TODO make configurable
+        # No model name required for this command
         true
       end
 
       def perform_execution
         if @options[:model_name]
-          test_single_model(create_executor({quiet: true}))
+          test_single_model(create_executor)
         else
           test_all_models
         end
@@ -40,23 +35,21 @@ module LLMs
       private
 
       def test_single_model(executor)
-        ##@@ TOODO should print out full model name here and elsewhere !! argh TODO
         begin
           if @options[:stream]
-            print "#{executor.model_name}: "
             response = executor.execute_prompt(@options[:prompt], system_prompt: @options[:system_prompt]) do |chunk|
               print chunk
             end
             puts
           else
             response = executor.execute_prompt(@options[:prompt], system_prompt: @options[:system_prompt])
-            puts "#{executor.model_name}: #{response}"
+            puts response
           end
 
           report_error(executor)
           report_usage(executor)
 
-        rescue => e
+        rescue StandardError => e
           puts "#{executor.model_name}: ERROR - #{e.message}"
           puts e.backtrace if @options[:debug]
         end
@@ -66,19 +59,13 @@ module LLMs
         models = get_models_to_test
 
         models.each do |model_name|
-          test_single_model(create_executor({model_name: model_name, quiet: true}))
+          test_single_model(create_executor({model_name: model_name}))
           puts "-" * 80
         end
       end
 
       def get_models_to_test
         models = LLMs::Models.list_model_names(full: true)
-
-        # Filter by latest if requested
-        if @options[:latest]
-          # TODO: Implement latest filtering logic
-          # For now, just use all models
-        end
 
         # Filter by model name if provided
         if ARGV[0]

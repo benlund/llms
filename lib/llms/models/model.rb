@@ -3,7 +3,6 @@ module LLMs
     class Model
       attr_reader :model_name, :provider, :pricing, :supports_tools, :supports_vision, :supports_thinking, :enabled
 
-      # nil for capabailities means unknown / unspecified - code will assume true for all capabilities in that case @@ TODO check this
       def initialize(model_name, provider, pricing: nil, supports_tools: nil, supports_vision: nil, supports_thinking: nil, enabled: nil)
         @model_name = model_name.to_s
         @provider = provider
@@ -58,12 +57,6 @@ module LLMs
         @provider.is_enabled? && (@enabled != false)
       end
 
-      ##@@ TODO fix this
-      def latest?
-        @pricing[:latest] == true
-      end
-
-      ## TODO check everything using this
       def calculate_cost(input_tokens, output_tokens, cache_read_tokens = 0, cache_write_tokens = 0)
         return 0.0 if @pricing.empty?
 

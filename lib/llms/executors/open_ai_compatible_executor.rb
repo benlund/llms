@@ -123,7 +123,7 @@ module LLMs
           end
 
           if @available_tools && @available_tools.any?
-            params[:tools] = tool_schemas ##todo make this an adapter
+            params[:tools] = tool_schemas
           end
 
           if is_stream && param_ok?(:stream_options)
@@ -169,7 +169,7 @@ module LLMs
                 cache_was_read = true
               end
               token_counts[:cached_input] = ct
-              token_counts[:input] -= ct ##@@ TODO is this correct?
+              token_counts[:input] -= ct ## TODO confirm this is correct
             end
           end
           
@@ -190,6 +190,7 @@ module LLMs
         }
       end
 
+      ## TODO move to adapter
       def tool_schemas
         @available_tools.map do |tool|
           {

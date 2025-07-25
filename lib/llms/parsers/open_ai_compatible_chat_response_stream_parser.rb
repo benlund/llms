@@ -124,7 +124,8 @@ module LLMs
               arguments
             ))
 
-            ## TODO  finish_reason"=>"tool_calls" <--- this is the finish reason when all tool calls completed
+            ## finish_reason"=>"tool_calls" <--- this is the finish reason when all tool calls completed
+            ## TODO use that instead?
 
             parsed, corrected = attempt_parse_json(current_tool_call['function']['arguments'])
 

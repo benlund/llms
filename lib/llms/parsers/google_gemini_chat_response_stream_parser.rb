@@ -119,7 +119,7 @@ module LLMs
 
       def update_usage_metadata(metadata)
         @usage_metadata = metadata
-        @emitter.emit(:usage_updated, Stream::Events::UsageUpdated.new(@current_message_id, @usage_metadata)) ##@@ TODO cehck this is correct
+        @emitter.emit(:usage_updated, Stream::Events::UsageUpdated.new(@current_message_id, @usage_metadata))
       end
     end
   end

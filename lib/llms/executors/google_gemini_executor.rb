@@ -70,8 +70,6 @@ module LLMs
           return nil
         end
 
-        ## TODO do this for other adapters too???
-
         @last_received_message_id = "gemini-#{Time.now.to_i}" ## no message id in the response
         @last_usage_data = calculate_usage(http_response, execution_time)
 
@@ -137,7 +135,7 @@ module LLMs
         end
       end
 
-      def tool_schemas ##@@ TODO check this with complicated tool schemas
+      def tool_schemas
         [
           {
             function_declarations: @available_tools.map do |tool|
@@ -164,7 +162,7 @@ module LLMs
         #                    "cache_read": 0.31
 
 
-        ## TODO support cache read/write tokens
+        ## TODO @@ support cache read/write tokens
 
         if usage_metadata = response['usageMetadata']
           input_tokens = 0

@@ -10,7 +10,7 @@ module LLMs
 
       def default_options
         super.merge({
-          max_completion_tokens: 1000, ## TODO grok 4 and gemini-2.5-pro needs much more than 100 - fix @@ - still no reply wih 1000 fix me @@
+          max_completion_tokens: 2000,
           prompt: "What is in this picture?",
           system_prompt: "Always reply in Latin"
         })
@@ -23,13 +23,13 @@ module LLMs
       end
 
       def setup
-        # No model name required for this command - TODO make configurable
+        # No model name required for this command
         true
       end
 
       def perform_execution
         if @options[:model_name]
-          test_single_model(create_executor({quiet: true}))
+          test_single_model(create_executor)
         else
           test_all_models
         end
@@ -46,20 +46,19 @@ module LLMs
           cm.add_user_message([{ text: @options[:prompt], image: image_data, media_type: 'image/png' }])
 
           if @options[:stream]
-            print "#{executor.model_name}: "
             executor.execute_conversation(cm) do |chunk|
               print chunk
             end
             puts
           else
             response_message = executor.execute_conversation(cm)
-            puts "#{executor.model_name}: #{response_message&.text}"
+            puts response_message&.text
           end
 
           report_error(executor)
           report_usage(executor)
 
-        rescue => e
+        rescue StandardError => e
           puts "#{executor.model_name}: ERROR - #{e.message}"
           puts e.backtrace if @options[:debug]
         end
@@ -69,7 +68,7 @@ module LLMs
         models = get_models_to_test
 
         models.each do |model_name|
-          test_single_model(create_executor({model_name: model_name, quiet: true}))
+          test_single_model(create_executor({model_name: model_name}))
           puts "-" * 80
         end
       end

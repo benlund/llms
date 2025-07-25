@@ -31,14 +31,14 @@ module LLMs
         @temperature = validate_temperature(params[:temperature] || DEFAULT_TEMPERATURE)
         @available_tools = params[:tools]
         
-        @cache_prompt = params[:cache_prompt] ##@@ todo check and rename
+        @cache_prompt = params[:cache_prompt] ##@@ TODO caching is automatic for most models now - remove this
         
         @max_tokens = validate_positive_integer_or_nil(params[:max_tokens], "max_tokens")
         @max_completion_tokens = validate_positive_integer_or_nil(params[:max_completion_tokens], "max_completion_tokens")
         @max_thinking_tokens = validate_positive_integer_or_nil(params[:max_thinking_tokens], "max_thinking_tokens")
 
         @thinking_mode = params.key?(:thinking) ? params[:thinking] : false
-        @thinking_effort = validate_thinking_effort(params[:thinking_effort]) ##@@ TODO validate this
+        @thinking_effort = validate_thinking_effort(params[:thinking_effort])
 
         ##@@ TODO warn if max_tokens used instead of max_completion_tokens and model is thining always model (or thinking is enabled)
 
@@ -110,7 +110,6 @@ module LLMs
       end
 
       def validate_positive_integer_or_nil(tokens, name)
-        ## TODO also check against model documentation
         unless tokens.nil? || (tokens.is_a?(Integer) && tokens > 0)
           raise LLMs::ConfigurationError, "#{name} must be a positive integer, got: #{tokens}"
         end

@@ -13,7 +13,7 @@ module LLMs
         def initialize(message_id, text = '')
           super()
           @message_id = message_id
-          @text = text ##@@ TODO remove if this is guaranteed to be never there
+          @text = text
         end
       end
 

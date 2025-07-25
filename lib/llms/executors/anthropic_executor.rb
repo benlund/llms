@@ -57,13 +57,13 @@ module LLMs
         begin        
           http_response = client_request
         rescue Faraday::BadRequestError => e        
-          @last_error = e.response[:body] ##@@TODO need error adapters too!!?!??
+          @last_error = e.response[:body]
           return nil
         end
         execution_time = Time.now - start_time
 
         if http_response['error']
-          @last_error = http_response['error'] ##@@ TODO or whole response? Adapter?
+          @last_error = http_response['error']
           return nil
         end
 
@@ -84,8 +84,7 @@ module LLMs
         @last_error = nil
 
         @system_prompt = conversation.system_message
-        @available_tools = conversation.available_tools ##@@ TODO map through an adapter here
-        ## TODO add acache control to last tool definition
+        @available_tools = conversation.available_tools
         @formatted_messages = conversation.messages.map.with_index do |message, index|
           is_last_message = index == conversation.messages.size - 1
           LLMs::Adapters::AnthropicMessageAdapter.to_api_format(message, caching_enabled? && is_last_message)
@@ -141,7 +140,7 @@ module LLMs
         @client = Anthropic::Client.new(access_token: fetch_api_key)
       end
 
-      ##@ TODO move to adapter
+      ## TODO move to adapter
       def tool_schemas
         ts = @available_tools.map do |tool|
           {
@@ -168,7 +167,6 @@ module LLMs
         end
       end
 
-      ##@@ TODO move to own class
       def calculate_usage(api_response, execution_time)
         input_tokens = nil
         output_tokens = nil
@@ -216,7 +214,7 @@ module LLMs
               end
             end
           elsif ccit = usage['cache_creation_input_tokens']
-            # if no details, assume all caching is 1hr TODO fix this
+            # if no details, assume all caching is 1hr - TODO fix this
             token_counts[:cache_write_1hr] = ccit
           end
           

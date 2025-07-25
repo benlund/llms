@@ -110,7 +110,7 @@ module LLMs
         if current_block['input'] == {}
           current_block['input'] = ''
         end
-        current_block['input'] << partial_json ##@@ TODO this is an emplty string first time
+        current_block['input'] << partial_json # This is an empty string first time
 
         @emitter.emit(:tool_call_arguments_json_delta, Stream::Events::ToolCallArgumentsJsonDelta.new(
           @id,
@@ -133,8 +133,6 @@ module LLMs
       def handle_content_block_stop(json)
         index = json['index']
         current_block = @content[index]
-
-        ##@@ TODO- emit a text completed event too?
 
         if current_block['type'] == 'tool_use'
           parse_tool_use_input(index)

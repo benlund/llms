@@ -27,7 +27,7 @@ module LLMs
               type: 'image',
               source: {
                 type: 'base64',
-                media_type: part[:media_type] || 'image/png', ##@@ TODO remove this
+                media_type: part[:media_type],
                 data: part[:image]
               }
             }
