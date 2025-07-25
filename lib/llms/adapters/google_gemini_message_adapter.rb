@@ -8,7 +8,8 @@ module LLMs
 
       def self.to_api_format(message)
         parts = []
-        ##@@ TODO order is impotant here so make sure order of results is same as order of calls- FIXME!!!
+        ## TODO order is important here - results must be given in same order as corresponding calls.
+        ## Currently the order is just assumed to be correctly preserved in the tool_results array
         message.tool_results&.each do |tool_result|
           parts << {functionResponse: { name: tool_result.name, response: { name: tool_result.name, content: tool_result.results}}}
         end

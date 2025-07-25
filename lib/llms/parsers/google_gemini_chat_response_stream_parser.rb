@@ -8,11 +8,15 @@ module LLMs
       attr_reader :current_message_id
 
       def full_response
-        {
+        fr = {
           'candidates' => @candidates,
           'modelVersion' => @model_version,
           'usageMetadata' => @usage_metadata
         }
+
+        pp fr
+
+        fr
       end
 
       protected
@@ -26,7 +30,6 @@ module LLMs
       end
 
       def handle_json(json)
-        #pp json
         update_candidates(json['candidates']) if json['candidates']
         update_model_version(json['modelVersion']) if json['modelVersion']
         update_usage_metadata(json['usageMetadata']) if json['usageMetadata']
@@ -39,7 +42,6 @@ module LLMs
           @candidates[index] ||= {}
           current_candidate = @candidates[index]
 
-          # Generate a message ID if we don't have one yet
           if @current_message_id.nil?
             @current_message_id = "gemini-#{Time.now.to_i}"
             @emitter.emit(:message_started, Stream::Events::MessageStarted.new(@current_message_id))
@@ -72,7 +74,7 @@ module LLMs
               tool_call_id = "tool_call#{@tool_call_count}"
 
               @emitter.emit(:tool_call_started, Stream::Events::ToolCallStarted.new(
-                              @message_id,
+                              @current_message_id,
                               tool_call_id,
                               @tool_call_count,
                               part['functionCall']['name'],
@@ -82,21 +84,21 @@ module LLMs
               args = part['functionCall']['args']
 
               @emitter.emit(:tool_call_arguments_json_delta, Stream::Events::ToolCallArgumentsJsonDelta.new(
-                              @message_id,
+                              @current_message_id,
                               tool_call_id,
                               @tool_call_count,
                               JSON.dump(args)
                             ))
 
               @emitter.emit(:tool_call_arguments_updated, Stream::Events::ToolCallArgumentsUpdated.new(
-                              @message_id,
+                              @current_message_id,
                               tool_call_id,
                               @tool_call_count,
                               args
                             ))
 
               @emitter.emit(:tool_call_completed, Stream::Events::ToolCallCompleted.new(
-                              @message_id,
+                              @current_message_id,
                               tool_call_id,
                               @tool_call_count,
                               part['functionCall']['name'],

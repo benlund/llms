@@ -92,6 +92,8 @@ module LLMs
         @available_tools = conversation.available_tools
       end
 
+      ## TODO we are not inserting fake message_ids nor fake tool_call_ids for the response data, only in stremed events
+
       def client_request
         @client.generate_content(@model_name, @formatted_messages, request_params)
       end
@@ -156,23 +158,26 @@ module LLMs
         cache_was_read = nil
         token_counts = {}    
 
-        #                    "input": 1.25,
-        #                    "output": 10.00,
-        #                    "cache_write_1mt/hr": 4.50,
-        #                    "cache_read": 0.31
-
-
-        ## TODO @@ support cache read/write tokens
+        ## TODO cache write is never reported in usageMetadata so we can't calculate it's cost
+        ## Maybe there is no cost for implicit caching?
+        ## TODO support explicit caching
 
         if usage_metadata = response['usageMetadata']
           input_tokens = 0
           output_tokens = 0
-          cache_was_written = false
           cache_was_read = false
 
           if ptc = usage_metadata['promptTokenCount']
             input_tokens += ptc
             token_counts[:input] = ptc
+          end
+
+          if cctc = usage_metadata['cachedContentTokenCount']
+            cache_was_read = true
+            token_counts[:cache_read] = cctc
+            if token_counts[:input]
+              token_counts[:input] -= cctc
+            end
           end
           
           if otc = usage_metadata['thoughtsTokenCount']
