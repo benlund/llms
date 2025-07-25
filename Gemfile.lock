@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    llms-rb (0.1.0)
+    llms (0.1.0)
       base64 (>= 0.1)
       faraday (~> 2.0)
       json (~> 2.0)
@@ -15,7 +15,7 @@ GEM
     base64 (0.3.0)
     diff-lcs (1.6.2)
     event_stream_parser (1.0.0)
-    faraday (2.13.2)
+    faraday (2.13.4)
       faraday-net_http (>= 2.0, < 3.5)
       json
       logger
@@ -42,7 +42,7 @@ GEM
     readline (0.0.4)
       reline
     regexp_parser (2.10.0)
-    reline (0.6.1)
+    reline (0.6.2)
       io-console (~> 0.5)
     rspec (3.13.1)
       rspec-core (~> 3.13.0)
@@ -88,7 +88,7 @@ PLATFORMS
 
 DEPENDENCIES
   bundler (~> 2.0)
-  llms-rb!
+  llms!
   rake (~> 13.0)
   rspec (~> 3.0)
   rubocop (~> 1.0)

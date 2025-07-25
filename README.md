@@ -16,7 +16,7 @@ Just about usable in production.
 
 Add to your Gemfile:
 ```ruby
-gem 'llms-rb'
+gem 'llms'
 ```
 
 Then run:
@@ -28,7 +28,7 @@ bundle install
 Or install directly:
 
 ```bash
-gem install llms-rb
+gem install llms
 ```
 
 ## Quick Start
@@ -152,7 +152,7 @@ After checking out the repo, run `bundle install` to install dependencies. Then,
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/benlund/llms-rb
+Bug reports and pull requests are welcome on GitHub at https://github.com/benlund/llms
 
 
 ## License

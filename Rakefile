@@ -10,15 +10,15 @@ task test: :spec
 
 desc "Build the gem"
 task build: :spec do
-  system "gem build llms-rb.gemspec"
+  system "gem build llms.gemspec"
 end
 
 desc "Install the gem locally"
 task install: :build do
-  system "gem install llms-rb-*.gem"
+  system "gem install llms-*.gem"
 end
 
 desc "Clean up build artifacts"
 task clean: :clobber do
-  rm_rf "llms-rb-*.gem"
+  rm_rf "llms-*.gem"
 end 
