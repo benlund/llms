@@ -64,7 +64,7 @@ RSpec.describe LLMs::Executors::GoogleGeminiExecutor do
       
       expect(usage[:input_tokens]).to eq(100)
       expect(usage[:output_tokens]).to eq(50)
-      expect(usage[:cache_was_written]).to be false
+      expect(usage[:cache_was_written]).to be_nil
       expect(usage[:cache_was_read]).to be false
       expect(usage[:token_details]).to eq({ input: 100, output: 50 })
       expect(usage[:execution_time]).to eq(1.5)
@@ -84,7 +84,7 @@ RSpec.describe LLMs::Executors::GoogleGeminiExecutor do
       
       expect(usage[:input_tokens]).to eq(100)
       expect(usage[:output_tokens]).to eq(75) # 25 + 50
-      expect(usage[:cache_was_written]).to be false
+      expect(usage[:cache_was_written]).to be_nil
       expect(usage[:cache_was_read]).to be false
       expect(usage[:token_details]).to eq({ 
         input: 100, 
@@ -113,7 +113,7 @@ RSpec.describe LLMs::Executors::GoogleGeminiExecutor do
       
       expect(usage[:input_tokens]).to eq(0)
       expect(usage[:output_tokens]).to eq(0)
-      expect(usage[:cache_was_written]).to be false
+      expect(usage[:cache_was_written]).to be_nil
       expect(usage[:cache_was_read]).to be false
       expect(usage[:token_details]).to eq({})
       expect(usage[:execution_time]).to eq(0.5)

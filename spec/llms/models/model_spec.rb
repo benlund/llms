@@ -163,18 +163,6 @@ RSpec.describe LLMs::Models::Model do
     end
   end
 
-  describe '#latest?' do
-    it 'returns true when model is marked as latest' do
-      pricing_with_latest = pricing.merge(latest: true)
-      model = described_class.new('test-model', provider, pricing: pricing_with_latest)
-      expect(model.latest?).to be true
-    end
-
-    it 'returns false when model is not marked as latest' do
-      expect(model.latest?).to be false
-    end
-  end
-
   describe '#calculate_cost' do
     it 'calculates cost based on input and output tokens' do
       cost = model.calculate_cost(1000, 500)

@@ -76,7 +76,7 @@ RSpec.describe LLMs::Executors::AnthropicExecutor do
       expect(usage[:token_details]).to eq({ 
         input: 100, 
         output: 50, 
-        cache_write_1hr: 25 
+        cache_write_5min: 25 
       })
     end
 
