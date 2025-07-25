@@ -11,9 +11,12 @@ module LLMs
       def execute_conversation(conversation, &block)
         if block_given?
           stream_conversation(conversation) do |handler|
-            #@@ TODO handle thinking delta also
             handler.on(:text_delta) do |event|
               yield event.text
+            end
+            ## TODO configure whether to yield thinking deltas
+            handler.on(:thinking_delta) do |event|
+              yield event.thinking
             end
           end
         else
@@ -89,6 +92,16 @@ module LLMs
           is_last_message = index == conversation.messages.size - 1
           LLMs::Adapters::AnthropicMessageAdapter.to_api_format(message, caching_enabled? && is_last_message)
         end
+
+        # Figure out where to put the cache control param if no messages are provided
+        # In reality there should always be a message, but we'll check
+        if caching_enabled? && @formatted_messages.empty?
+          if @available_tools && @available_tools.any?
+            @available_tools.last[:cache_control] = {type: "ephemeral"}
+          elsif @system_prompt && (@system_prompt.is_a?(String) || !@system_prompt[:cache_control])
+            @system_prompt = {type: "text", text: @system_prompt, cache_control: {type: "ephemeral"}}
+          end
+        end
       end
 
       def request_params
@@ -114,6 +127,9 @@ module LLMs
             params[:thinking] = { type: 'enabled' }.tap do |thinking_params|
               if @max_thinking_tokens
                 thinking_params[:budget_tokens] = @max_thinking_tokens
+              else
+                # This is the minimum budget for thinking, and is required if thinking is enabled
+                thinking_params[:budget_tokens] = 1024
               end
             end
           end
@@ -142,7 +158,7 @@ module LLMs
 
       ## TODO move to adapter
       def tool_schemas
-        ts = @available_tools.map do |tool|
+        @available_tools.map do |tool|
           {
             name: tool.tool_schema[:name],
             description: tool.tool_schema[:description],
@@ -153,18 +169,10 @@ module LLMs
             }
           }
         end
-        if caching_enabled?
-          ts.last[:cache_control] = {type: "ephemeral"}
-        end
-        ts
       end
 
       def system_param
-        if caching_enabled?
-          [{type: "text", text: @system_prompt, cache_control: {type: "ephemeral"}}]
-        else
-          @system_prompt
-        end
+        @system_prompt
       end
 
       def calculate_usage(api_response, execution_time)
@@ -214,8 +222,8 @@ module LLMs
               end
             end
           elsif ccit = usage['cache_creation_input_tokens']
-            # if no details, assume all caching is 1hr - TODO fix this
-            token_counts[:cache_write_1hr] = ccit
+            # if no details, all caching is 5min
+            token_counts[:cache_write_5min] = ccit
           end
           
           if ot = usage['output_tokens']

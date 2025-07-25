@@ -31,7 +31,7 @@ module LLMs
         @temperature = validate_temperature(params[:temperature] || DEFAULT_TEMPERATURE)
         @available_tools = params[:tools]
         
-        @cache_prompt = params[:cache_prompt] ##@@ TODO caching is automatic for most models now - remove this
+        @cache_prompt = params[:cache_prompt] ## TODO caching is automatic for most models now
         
         @max_tokens = validate_positive_integer_or_nil(params[:max_tokens], "max_tokens")
         @max_completion_tokens = validate_positive_integer_or_nil(params[:max_completion_tokens], "max_completion_tokens")
@@ -40,7 +40,7 @@ module LLMs
         @thinking_mode = params.key?(:thinking) ? params[:thinking] : false
         @thinking_effort = validate_thinking_effort(params[:thinking_effort])
 
-        ##@@ TODO warn if max_tokens used instead of max_completion_tokens and model is thining always model (or thinking is enabled)
+        ##TODO warn if max_tokens is used instead of max_completion_tokens and model is a thinking model (or thinking is enabled)
 
         @last_sent_message = nil
         @last_received_message = nil
@@ -85,7 +85,7 @@ module LLMs
       end
 
       def caching_enabled?
-        @cache_prompt == true ##@@ TODO this is on by default now for most models, allow for this @@ TODO
+        @cache_prompt == true ##TODO caching is automatic by default now for non-Anthropic models that support it
       end
 
       def calculate_usage(response)

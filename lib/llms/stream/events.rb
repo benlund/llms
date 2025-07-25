@@ -26,6 +26,15 @@ module LLMs
         end
       end
 
+      class ThinkingDelta < Base
+        attr_reader :message_id, :thinking
+        def initialize(message_id, thinking)
+          super()
+          @message_id = message_id
+          @thinking = thinking
+        end
+      end
+
       class TextDelta < Base
         attr_reader :message_id, :text
         def initialize(message_id, text)

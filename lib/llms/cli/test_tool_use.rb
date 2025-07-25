@@ -26,7 +26,7 @@ module LLMs
 
       def default_options
         super.merge({
-          max_completion_tokens: 250,
+          max_completion_tokens: 1000,
           prompt: "2+2=",
           system_prompt: "Always reply with a tool use function call"
         })

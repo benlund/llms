@@ -75,6 +75,10 @@ module LLMs
           ## May never happen, but just in case
           @emitter.emit(:text_delta, Stream::Events::TextDelta.new(block['text']))
 
+        elsif block['type'] == 'thinking' && block['thinking'] && !block['thinking'].empty?
+          ## Maybe never happens, but just in case
+          @emitter.emit(:thinking_delta, Stream::Events::ThinkingDelta.new(@id, block['thinking']))
+
         elsif block['type'] == 'tool_use'
           @emitter.emit(:tool_call_started, Stream::Events::ToolCallStarted.new(
             @id,
@@ -96,6 +100,12 @@ module LLMs
           current_block['text'] ||= ''
           current_block['text'] << text
           @emitter.emit(:text_delta, Stream::Events::TextDelta.new(@id, text))
+
+        when 'thinking_delta'
+          thinking = json['delta']['thinking']
+          current_block['thinking'] ||= ''
+          current_block['thinking'] << thinking
+          @emitter.emit(:thinking_delta, Stream::Events::ThinkingDelta.new(@id, thinking))
 
         when 'input_json_delta'
           if current_block['type'] == 'tool_use'

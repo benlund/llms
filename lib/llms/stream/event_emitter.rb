@@ -5,6 +5,7 @@ module LLMs
         :message_started,
         :usage_updated,
         :text_delta,
+        :thinking_delta,
         :tool_call_started,
         :tool_call_arguments_json_delta,
         :tool_call_arguments_updated,

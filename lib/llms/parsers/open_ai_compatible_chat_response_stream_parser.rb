@@ -18,7 +18,8 @@ module LLMs
         {
           'id' => @id,
           'model' => @model,
-          'choices' => @choices, #converted_choices, @@ TODO
+          # TODO I think this should be converted_choices, but providers are inconsistent in their response formats - switch to this after more testing
+          'choices' => @choices, #converted_choices, 
           'usage' => @usage,
           'created' => @created
         }

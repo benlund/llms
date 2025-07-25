@@ -148,7 +148,7 @@ module LLMs
         executor = LLMs::Executors.instance(**@options.merge(options_override))
 
         unless @options.merge(options_override)[:quiet]
-          puts "Connected to: #{executor.model_name} (#{executor.class.name})"
+          puts "Connected to: #{executor.model_name} (#{executor.class.name}#{executor.base_url ? " #{executor.base_url}" : ""})"
         end
 
         executor
