@@ -82,7 +82,7 @@ end
 
 ## Supported Models
 
-LLMs from Anthropic, Google, xAI, and various open-weight inference hosts are pre-configured in this release. See `lib/llms/public_models.json` for the full list. No models from OpenAI are pre-configured but you can set them up them manually in your application code along the lines of the exmaple above.
+LLMs from Anthropic, Google, xAI, and various open-weight inference hosts are pre-configured in this release. See `lib/llms/public_models.json` for the full list. No models from OpenAI are pre-configured but you can set them up them manually in your application code along the lines of the example above.
 
 
 ## Configuration
