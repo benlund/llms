@@ -11,6 +11,8 @@ Supports streaming, event-handling, conversation management, tool-use, image inp
 
 Just about usable in production.
 
+[Released 2025-07-25 on Rubygems](https://rubygems.org/gems/llms)
+
 
 ## Installation
 
@@ -139,7 +141,7 @@ llms-chat --list-models
 ### Test various features against all models
 
 ```bash
-llms-test-model-access # send a cshort question with a custom system prompt to all models in turn
+llms-test-model-access # send a short question with a custom system prompt to all models in turn
 llms-test-model-tool-usage # configures a simple tool and asks all models in turn to call it
 llms-test-model-image-support # sends an image to every model asking it to describe the image
 llms-test-prompt-caching # send a long prompt and see if it is cached
