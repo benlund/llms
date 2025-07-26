@@ -4,6 +4,8 @@ A Ruby library for interacting with Large Language Model (LLM) providers includi
 
 Supports streaming, event-handling, conversation management, tool-use, image input, and cost-tracking.
 
+See also [llms-tool](https://github.com/benlund/llms-tool) and llms-agent (coming soon).
+
 
 ## Current Version
 
