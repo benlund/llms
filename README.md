@@ -49,7 +49,7 @@ executor = LLMs::Executors.instance(
 puts executor.execute_prompt("What is 2+2?")
 
 # Streaming response
-executor.execute_prompt("What is the airspeed velocitty of an unladen swallow?") do |chunk|
+executor.execute_prompt("What is the airspeed velocity of an unladen swallow?") do |chunk|
   print chunk
 end
 
@@ -94,7 +94,7 @@ export ANTHROPIC_API_KEY="your-anthropic-key"
 export GOOGLE_GEMINI_API_KEY="your-gemini-key"
 ```
 
-See lib/public_models.json for supported providers and their corresponding API key env vars.
+See `lib/llms/public_models.json` for supported providers and their corresponding API key env vars.
 
 Or pass to directly into Executor initialization:
 
