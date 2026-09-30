@@ -39,6 +39,8 @@ module LLMs
 
         @thinking_mode = params.key?(:thinking) ? params[:thinking] : false
         @thinking_effort = validate_thinking_effort(params[:thinking_effort])
+        @omit_sampling = params[:omit_sampling] == true
+        @thinking_api = params[:thinking_api]
 
         ##TODO warn if max_tokens is used instead of max_completion_tokens and model is a thinking model (or thinking is enabled)
 
@@ -95,11 +97,11 @@ module LLMs
       def validate_thinking_effort(effort)
         return if effort.nil?
 
-        if effort.to_s.in?(%w[low medium high])
-          effort.to_s
-        else
-          raise LLMs::ConfigurationError, "Thinking effort must be a string 'low', 'medium', or 'high', got: #{effort}"
+        effort = effort.to_s
+        unless %w[low medium high max xhigh].include?(effort)
+          raise LLMs::ConfigurationError, "Thinking effort must be low, medium, high, max, or xhigh, got: #{effort}"
         end
+        effort
       end
 
       def validate_temperature(temp)

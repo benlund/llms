@@ -1,7 +1,8 @@
 module LLMs
   module Models
     class Provider
-      attr_reader :provider_name, :executor_class_name, :base_url, :api_key_env_var, :supports_tools, :supports_vision, :supports_thinking, :enabled, :exclude_params
+      attr_reader :provider_name, :executor_class_name, :base_url, :api_key_env_var, :supports_tools, :supports_vision, :supports_thinking, :exclude_params
+      attr_accessor :enabled
 
       def initialize(provider_name, executor_class_name, base_url: nil, api_key_env_var: nil, supports_tools: nil, supports_vision: nil, supports_thinking: nil, enabled: nil, exclude_params: nil)
         @provider_name = provider_name.to_s

@@ -5,14 +5,14 @@ require_relative 'models/model'
 module LLMs
   module Models
 
-    DEFAULT_MODEL = 'claude-sonnet-4-0'
+    DEFAULT_MODEL = 'claude-sonnet-5'
 
     PROVIDER_REGISTRY = {}
     PROVIDER_TO_MODEL_REGISTRY = {}
     MODEL_TO_PROVIDER_REGISTRY = {}
     ALIAS_REGISTRY = {}
 
-    def self.register_model(provider_name, model_name, pricing: nil, tools: nil, vision: nil, thinking: nil, enabled: nil, aliases: nil)
+    def self.register_model(provider_name, model_name, pricing: nil, tools: nil, vision: nil, thinking: nil, enabled: nil, aliases: nil, omit_sampling: nil, thinking_api: nil)
       provider = PROVIDER_REGISTRY[provider_name.to_s]
       raise "Unknown provider: #{provider_name}" unless provider
 
@@ -23,7 +23,9 @@ module LLMs
         supports_tools: tools,
         supports_vision: vision,
         supports_thinking: thinking,
-        enabled: enabled
+        enabled: enabled,
+        omit_sampling: omit_sampling,
+        thinking_api: thinking_api
       )
 
       PROVIDER_TO_MODEL_REGISTRY[provider.provider_name] ||= {}
@@ -102,7 +104,7 @@ module LLMs
       )
       register_model(
         provider.provider_name, model_name,
-        **details.slice(:pricing, :tools, :vision, :thinking, :enabled, :aliases)
+        **details.slice(:pricing, :tools, :vision, :thinking, :enabled, :aliases, :omit_sampling, :thinking_api)
       )
     end
 
@@ -113,7 +115,7 @@ module LLMs
         register_provider(provider_name, executor_class_name, **params)
 
         info['models'].each do |model_name, model_info|
-          params = model_info.slice('pricing', 'tools', 'vision', 'thinking', 'enabled', 'aliases').transform_keys(&:to_sym)
+          params = model_info.slice('pricing', 'tools', 'vision', 'thinking', 'enabled', 'aliases', 'omit_sampling', 'thinking_api').transform_keys(&:to_sym)
           register_model(provider_name, model_name, **params)
         end
       end

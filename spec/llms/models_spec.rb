@@ -23,6 +23,13 @@ RSpec.describe LLMs::Models do
       expect(model.provider.provider_name).to eq('anthropic')
     end
 
+    it 'returns claude-sonnet-5 with sampling omitted' do
+      model = described_class.find_model('claude-sonnet-5')
+      expect(model.model_name).to eq('claude-sonnet-5')
+      expect(model.omit_sampling).to eq(true)
+      expect(model.thinking_api).to eq('adaptive')
+    end
+
     it 'returns nil for invalid model name' do
       model = described_class.find_model('invalid_model')
       expect(model).to be_nil

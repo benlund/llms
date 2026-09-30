@@ -6,6 +6,48 @@
         "tools": true,
         "vision": true,
         "models": {
+            "claude-sonnet-5": {
+                "aliases": ["claude-sonnet-latest"],
+                "latest": true,
+                "omit_sampling": true,
+                "thinking_api": "adaptive",
+                "pricing": {
+                    "input": 2.00,
+                    "output": 10.00,
+                    "cache_write_5min": 2.50,
+                    "cache_write_1hr": 4.00,
+                    "cache_read": 0.20
+                },
+                "context_window": 1000000,
+                "max_output": 128000
+            },
+            "claude-opus-5-5": {
+                "aliases": ["claude-opus-latest"],
+                "omit_sampling": true,
+                "thinking_api": "adaptive_always",
+                "pricing": {
+                    "input": 4.00,
+                    "output": 20.00,
+                    "cache_write_5min": 5.00,
+                    "cache_write_1hr": 8.00,
+                    "cache_read": 0.20
+                },
+                "context_window": 1000000,
+                "max_output": 128000
+            },
+            "claude-haiku-4-5-20251001": {
+                "aliases": ["claude-haiku-4-5", "claude-haiku-latest"],
+                "latest": true,
+                "pricing": {
+                    "input": 1.00,
+                    "output": 5.00,
+                    "cache_write_5min": 1.25,
+                    "cache_write_1hr": 2.00,
+                    "cache_read": 0.10
+                },
+                "context_window": 200000,
+                "max_output": 64000
+            },
             "claude-opus-4-20250514": {
                 "aliases": ["claude-opus-4-0"],
                 "latest": true,
@@ -117,6 +159,26 @@
         "vision": true,
         "_TODO": "check all below do support vision; mark which do not support thinking",
         "models": {
+            "gemini-3.1-flash-lite": {
+                "latest": true,
+                "pricing": {
+                    "input": 0.25,
+                    "output": 1.50,
+                    "cache_read": 0.025
+                },
+                "context_window": 1048576,
+                "max_output": 65536
+            },
+            "gemini-3.5-flash": {
+                "latest": true,
+                "pricing": {
+                    "input": 1.50,
+                    "output": 9.00,
+                    "cache_read": 0.15
+                },
+                "context_window": 1048576,
+                "max_output": 65536
+            },
             "gemini-2.5-pro": {
                 "latest": true,
                 "pricing": {

@@ -18,6 +18,8 @@ module LLMs
       api_key_env_var = params[:api_key_env_var]
       pricing = params[:pricing]
       exclude_params = params[:exclude_params]
+      omit_sampling = params[:omit_sampling]
+      thinking_api = params[:thinking_api]
 
       if params[:oac_base_url]
         executor_class = OpenAICompatibleExecutor
@@ -34,6 +36,8 @@ module LLMs
         api_key_env_var = model.provider.api_key_env_var
         pricing = model.pricing
         exclude_params = model.provider.exclude_params
+        omit_sampling = model.omit_sampling
+        thinking_api = model.thinking_api
       end
 
       init_params = params.merge(
@@ -42,7 +46,9 @@ module LLMs
         api_key:,
         api_key_env_var:,
         pricing:,
-        exclude_params:
+        exclude_params:,
+        omit_sampling:,
+        thinking_api:
       )
 
       executor_class.new(**init_params)

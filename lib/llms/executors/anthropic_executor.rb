@@ -108,32 +108,46 @@ module LLMs
         {
           messages: @formatted_messages,
           model: @model_name,
-          temperature: @temperature,
+          max_tokens: completion_token_limit,
         }.tap do |params|
+          params[:temperature] = @temperature unless @omit_sampling
           if @system_prompt
             params[:system] = system_param
-          end
-          if @max_tokens
-            params[:max_tokens] = @max_tokens
-          end
-          ## Will override max_tokens if both are provided
-          if @max_completion_tokens
-            params[:max_tokens] = @max_completion_tokens
           end
           if @available_tools && @available_tools.any?
             params[:tools] = tool_schemas
           end
-          if @thinking_mode
-            params[:thinking] = { type: 'enabled' }.tap do |thinking_params|
-              if @max_thinking_tokens
-                thinking_params[:budget_tokens] = @max_thinking_tokens
-              else
-                # This is the minimum budget for thinking, and is required if thinking is enabled
-                thinking_params[:budget_tokens] = 1024
-              end
-            end
+          if (thinking = thinking_request)
+            params[:thinking] = thinking
+          end
+          if (effort = effort_request)
+            params[:output_config] = { effort: effort }
           end
         end
+      end
+
+      # Claude Sonnet 5 rejects non-default sampling and manual extended thinking.
+      # Adaptive models think unless the request sets thinking.type to "disabled".
+      # Opus 5.5 cannot disable thinking (thinking_api "adaptive_always").
+      def thinking_request
+        case @thinking_api
+        when 'adaptive'
+          @thinking_mode ? { type: 'adaptive' } : { type: 'disabled' }
+        when 'adaptive_always'
+          @thinking_mode ? { type: 'adaptive' } : nil
+        else
+          return nil unless @thinking_mode
+          { type: 'enabled', budget_tokens: @max_thinking_tokens || 1024 }
+        end
+      end
+
+      def effort_request
+        return nil unless @thinking_mode && @thinking_api.to_s.start_with?('adaptive')
+        @thinking_effort || 'low'
+      end
+
+      def completion_token_limit
+        @max_completion_tokens || @max_tokens || 8192
       end
 
       def client_request
