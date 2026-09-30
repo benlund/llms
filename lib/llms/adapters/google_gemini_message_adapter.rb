@@ -15,7 +15,7 @@ module LLMs
         end
 
         message.parts&.each do |part|
-          if part[:text]
+          if part[:text] && !part[:text].empty?
             parts << {text: part[:text]}
           end
           if part[:image]
