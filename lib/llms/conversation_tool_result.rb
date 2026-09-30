@@ -7,9 +7,9 @@ module LLMs
       @index = index
       @tool_call_id = tool_call_id
       @tool_call_type = tool_call_type
-      @name = name
+      @name = name ##@@ TODO rename to tool_name
       @results = results
       @is_error = is_error
     end
   end
-end 
+end

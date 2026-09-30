@@ -217,4 +217,49 @@ RSpec.describe LLMs::Executors::AnthropicExecutor do
       expect(exec.last_error).to eq('api error')
     end
   end
+
+  describe '#request_params' do
+    before do
+      executor.instance_variable_set(:@formatted_messages, [{ role: 'user', content: 'hi' }])
+      executor.instance_variable_set(:@system_prompt, nil)
+      executor.instance_variable_set(:@available_tools, nil)
+    end
+
+    context 'with a legacy model' do
+      let(:executor) { described_class.new(**params) }
+
+      it 'sends temperature and requires max_tokens' do
+        request = executor.send(:request_params)
+        expect(request[:temperature]).to eq(0.0)
+        expect(request[:max_tokens]).to eq(1000)
+        expect(request).not_to have_key(:thinking)
+      end
+    end
+
+    context 'with an adaptive model that can disable thinking' do
+      let(:executor) do
+        described_class.new(**params.merge(model_name: 'claude-sonnet-5', omit_sampling: true, thinking_api: 'adaptive'))
+      end
+
+      it 'omits temperature and disables thinking' do
+        request = executor.send(:request_params)
+        expect(request).not_to have_key(:temperature)
+        expect(request[:thinking]).to eq({ type: 'disabled' })
+        expect(request).not_to have_key(:output_config)
+      end
+    end
+
+    context 'with a model that cannot disable thinking' do
+      let(:executor) do
+        described_class.new(**params.merge(model_name: 'claude-opus-5-5', omit_sampling: true, thinking_api: 'adaptive_always', thinking: true, thinking_effort: 'medium'))
+      end
+
+      it 'sends adaptive thinking and effort' do
+        request = executor.send(:request_params)
+        expect(request).not_to have_key(:temperature)
+        expect(request[:thinking]).to eq({ type: 'adaptive' })
+        expect(request[:output_config]).to eq({ effort: 'medium' })
+      end
+    end
+  end
 end

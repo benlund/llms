@@ -1,9 +1,10 @@
 module LLMs
   module Models
     class Model
-      attr_reader :model_name, :provider, :pricing, :supports_tools, :supports_vision, :supports_thinking, :enabled
+      attr_reader :model_name, :provider, :pricing, :supports_tools, :supports_vision, :supports_thinking, :omit_sampling, :thinking_api
+      attr_accessor :enabled
 
-      def initialize(model_name, provider, pricing: nil, supports_tools: nil, supports_vision: nil, supports_thinking: nil, enabled: nil)
+      def initialize(model_name, provider, pricing: nil, supports_tools: nil, supports_vision: nil, supports_thinking: nil, enabled: nil, omit_sampling: nil, thinking_api: nil)
         @model_name = model_name.to_s
         @provider = provider
         @pricing = pricing&.transform_keys(&:to_sym)
@@ -11,6 +12,8 @@ module LLMs
         @supports_vision = supports_vision
         @supports_thinking = supports_thinking
         @enabled = enabled
+        @omit_sampling = omit_sampling == true
+        @thinking_api = thinking_api
       end
 
       def full_name
