@@ -29,6 +29,13 @@ RSpec.describe LLMs::Adapters::AnthropicMessageAdapter do
       )
     end
 
+    it 'leaves out empty text, e.g. for a tool-only assistant turn' do
+      tool_call = LLMs::ConversationToolCall.new(0, 'toolu_1', 'function', 'run_sql', { 'sql' => 'SELECT 1' })
+      message = LLMs::ConversationMessage.new('assistant', '', [tool_call], nil)
+      result = described_class.to_api_format(message)
+      expect(result[:content]).to eq([{ type: 'tool_use', id: 'toolu_1', name: 'run_sql', input: { 'sql' => 'SELECT 1' } }])
+    end
+
     it 'handles message with images' do
       message_with_image = LLMs::ConversationMessage.new('user', 'Look at this image')
       allow(message_with_image).to receive(:parts).and_return([

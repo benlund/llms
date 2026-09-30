@@ -19,7 +19,9 @@ module LLMs
         end
 
         message.parts&.each do |part|
-          if part[:text]
+          # The API rejects empty text blocks (e.g. an assistant turn that
+          # only calls tools), so leave them out.
+          if part[:text] && !part[:text].empty?
             content << {type: 'text', text: part[:text]}
           end
           if part[:image]
